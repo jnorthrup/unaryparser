@@ -73,7 +73,7 @@
     <dependency>
       <groupId>com.github.0xcopy</groupId>
       <artifactId>bbcursive</artifactId>
-      <version>-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
      <dependency>
        <groupId>org.jetbrains.kotlin</groupId>

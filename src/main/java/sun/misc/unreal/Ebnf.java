@@ -1,12 +1,7 @@
 package sun.misc.unreal;
 
-import bbcursive.Cursive;
-import org.jetbrains.annotations.Nullable;
-
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.function.UnaryOperator;
-import java.util.stream.StreamSupport;
 
 import static bbcursive.Cursive.post.reset;
 import static bbcursive.Cursive.pre.mark;
@@ -14,7 +9,6 @@ import static bbcursive.Cursive.pre.noop;
 import static bbcursive.std.*;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
-
 
 
 /**
@@ -45,7 +39,6 @@ import static java.lang.Character.isDigit;
  * <p>
  * rule = lhs , "=" , rhs , ";" ;
  * grammar = { rule } ;
- *
  */
 public interface Ebnf {
 
@@ -59,28 +52,30 @@ public interface Ebnf {
         if (b.hasRemaining() && isDigit(bb(b, mark).get() & 0xff)) c++;
         return c <= 0 ? null : bb(b);
     };
-    UnaryOperator<ByteBuffer> word = ((ByteBuffer b) -> {
+    UnaryOperator<ByteBuffer> word = b -> {
         int c = 0;
         while (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
         return c > 0 ? bb(b, b.hasRemaining() ? reset : noop) : null;
-    });
-    UnaryOperator<ByteBuffer> symbol = b -> tryAll(b, chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'), chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','), chlit(';'));
-
-    @Nullable
-    static ByteBuffer tryAll(ByteBuffer b, UnaryOperator<ByteBuffer>...cursives) {
-
-        Arrays.stream(cursives).parallel().anyMatch(bb(it))
-
-    }
+    };
+    UnaryOperator<ByteBuffer> symbol = allOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'),
+            chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','),
+            chlit(';'));
     UnaryOperator<ByteBuffer>
-            character = anyOf(letter, digit, symbol, chlit('_'));
-    UnaryOperator<ByteBuffer>
-            identifier = allOf(letter, opt(anyOf(letter, digit, chlit('_'))));
+            character = anyOf(Ebnf.letter, Ebnf.digit, Ebnf.symbol, chlit('_'));
+    UnaryOperator<ByteBuffer> identifier = allOf(Ebnf.letter, opt(anyOf(Ebnf.letter, Ebnf.digit, chlit('_'))));
+    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), Ebnf.character, repeat(Ebnf.character), anyOf(chlit('\'') , chlit('"')), Ebnf.character, repeat(Ebnf.character), chlit('"'));
+    UnaryOperator<ByteBuffer> lhs= Ebnf.identifier;
+    UnaryOperator<ByteBuffer> rhs=anyOf(Ebnf.identifier, Ebnf.terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
+    UnaryOperator<ByteBuffer> optional=allOf(chlit("[" ), Ebnf.rhs,chlit( "]"));
+    UnaryOperator<ByteBuffer> repeating=allOf(chlit("{"), Ebnf.rhs, chlit("}"));
+    UnaryOperator<ByteBuffer> grouping =allOf(chlit("("), Ebnf.rhs,chlit( ")"));
+    UnaryOperator<ByteBuffer> firstOf=allOf(Ebnf.rhs,chlit("|") , Ebnf.rhs);
+    UnaryOperator<ByteBuffer> listOf =allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
+    UnaryOperator<ByteBuffer> rule = allOf(lhs , chlit("=") , rhs , chlit(";" ));
+    UnaryOperator<ByteBuffer> grammar=repeat(Ebnf.rule);
+            ;
 
-//     terminal = anyOf(allOf(chlit('\'') , character , repeat( character ) , "'" ),allOf( '"' , character , { character } , '"')) ;
+//     terminal = anyOf(allOf(chlit('\'') , character, repeat(character) , "'" ),allOf( '"' , character, {character} , '"')) ;
 
 
-    static UnaryOperator<ByteBuffer> chlit(char c) {
-        return buf -> buf.hasRemaining() && c == (bb(buf, mark).get() & 0xff) ? buf : null;
-    }
 }
