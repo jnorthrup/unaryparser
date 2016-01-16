@@ -1,0 +1,78 @@
+//(* Narsese Grammar - https://github.com/opennars/opennars/wiki/Input-Output-Format *)
+
+             task ::= [budget] sentence                     //(* task to be processed *)
+//
+         sentence ::= statement"." [tense] [truth]          //(* judgement to be remembered *)
+                    | statement"?" [tense] [truth]          //(* question to be answered, tense added in OpenNARS 1.7 *)
+                    | statement"@" [tense] [truth]          //(* question on desire value to be answered, tense added in OpenNARS 1.7 *)
+                    | statement"!" [tense] [truth]          //(* goal to be realized, tense added in OpenNARS 1.7 *);
+//
+        statement ::= "<"term copula term">"                //(* two terms related to each other *)
+                    | "("term copula term")"                //(* two terms related to each other, new notation *)
+                    | "+++"   term                          //(* a term can name a statement *)
+                    | "(^" word {","term} ")"               //(* an operation to be executed *)
+                    | word"("term {","term} ")"             //(* an operation to be executed, new notation *);
+//
+           copula ::= "-->"                                 //(* inheritance *)
+                    | "<->"                                 //(* similarity *)
+                    | "{--"                                 //(* instance *)
+                    | "--]"                                 //(* property *)
+                    | "{-]"                                 //(* instance-property *)
+                    | "==>"                                 //(* implication *)
+                    | "=/>"                                 //(* predictive implication *)
+                    | "=|>"                                 //(* concurrent implication *)
+                    | "=\\>"                                //(* =\> retrospective implication *)
+                    | "<=>"                               //  (* equivalence *)
+                    | "</>"                                 //(* predictive equivalence *)
+                    | "<|>"                                 //(* concurrent equivalence *);
+//
+             term ::= word                                  //(* an atomic constant term *)
+                    | variable                              //(* an atomic variable term *)
+                    | compoundTerm                         //(* a term with internal structure *)
+                    | statement                             //(* a statement can serve as a term *)
+                    | interval                              //(* time measure between events *);
+//
+    compoundTerm ::= "{" term {","term} "}"                //(* extensional set *)
+                    | "[" term {","term} "]"                //(* intensional set *)
+                    | "("infixOpMulti","term{","term} ")" //(* compound term with infix operator *)
+                    | "("infixOpSingle","term"," term ")" //(* compound term with infix operator *)
+                    | "(" term {","term} ")"                //(* product, new notation *)
+                    | "(/," term {","term} ")"              //(* extensional image *)
+                    | "(\\," term {","term} ")"             //(* \ intensional image *)
+                    | "(--," term ")"                       //(* negation *)
+                    | "--"term                              //(* negation, new notation *)
+                                                            //(* new compound-term notation *)
+                    | "(" term {infixOpMulti  term} ")"   // (* compound term with infix operator *)
+                    | "(" term infixOpSingle term ")"   ;  //(* compound term with infix operator *);
+//
+   infixOpMulti ::= "&&"                                  //(* conjunction *)
+                    | "*"                                   //(* product *)
+                    | "||"                                  //(* disjunction *)
+                    | "&|"                                  //(* parallel events *)
+                    | "&/"                                  //(* sequential events *)
+                    | "|"                                   //(* intensional intersection *)
+                    | "&"                                   //(* extensional intersection *);
+//
+  infixOpSingle ::= "-"                                   //(* extensional difference *)
+                    | "~"                                   //(* intensional difference *);
+//
+         variable ::= "$"word                               //(* independent variable *)
+                    | "#"[word]                             //(* dependent variable *)
+                    | "?"[word]                             //(* query variable in question *);
+//
+            tense ::= ":/:"                                 //(* future event *)
+                    | ":|:"                                 //(* present event *)
+                    | ":\\:"                                //(* :\: past event *)
+                    | <":">                                 //(* defined event, output only *);
+//
+         interval ::= <"/">                                 //(* integer *);
+//
+            truth ::= <"%">frequency[<";">confidence]<"%">  //(* two numbers in [0,1]x(0,1) *);
+           budget ::= <"$">priority[<";">durability][<";">quality]<"$">   //(* three numbers in [0,1]x(0,1)x[0,1] *);
+
+               word ::= "\w+"                                //(* unicode string *)
+           priority ::= "([0]?\.[0-9]+|1|0)"                 //(* 0 <= x <= 1 *)
+         durability ::= "[0]?\.[0]*[1-9]{1}[0-9]*"           //(* 0 <  x <  1 *)
+            quality ::= "([0]?\.[0-9]+|1|0)"                 //(* 0 <= x <= 1 *)
+          frequency ::= "([0]?\.[0-9]+|1|0)"                 //(* 0 <= x <= 1 *)
+         confidence ::= "[0]?\.[0]*[1-9]{1}[0-9]*"           //(* 0 <  x <  1 *)
