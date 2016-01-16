@@ -21,8 +21,7 @@ import static java.lang.Character.isDigit;
  * | "q" | "r" | "s" | "t" | "u" | "v" | "w"
  * | "x" | "y" | "z" ;
  * digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
- * symbol = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">"
- * | "'" | '"' | "=" | "|" | "." | "," | ";" ;
+ * symbol = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "'" | '"' | "=" | "|" | "." | "," | ";" ;
  * character = letter | digit | symbol | "_" ;
  * <p>
  * identifier = letter , { letter | digit | "_" } ;
@@ -37,45 +36,41 @@ import static java.lang.Character.isDigit;
  * | rhs , "|" , rhs
  * | rhs , "," , rhs ;
  * <p>
- *
+ * <p>
  * rule = lhs , "=" , rhs , ";" ;
  * grammar = { rule } ;
  */
-public interface Ebnf {
+public   interface Ebnf {
+    ;
 
-    UnaryOperator<ByteBuffer> letter = b -> {
+    public static final UnaryOperator<ByteBuffer> letter = b -> {
         int c = 0;
         if (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
-        return c > 0 ? bb(b) : null;
+        return 0 < c ? bb(b) : null;
     };
-    UnaryOperator<ByteBuffer> digit = b -> {
+    public static final UnaryOperator<ByteBuffer> digit = b -> {
         int c = 0;
         if (b.hasRemaining() && isDigit(bb(b, mark).get() & 0xff)) c++;
-        return c <= 0 ? null : bb(b);
+        return 0 >= c ? null : bb(b);
     };
-    UnaryOperator<ByteBuffer> word = b -> {
+    public static final UnaryOperator<ByteBuffer> word = b -> {
         int c = 0;
         while (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
-        return c > 0 ? bb(b, b.hasRemaining() ? reset : noop) : null;
+        return 0 < c ? bb(b, b.hasRemaining() ? reset : noop) : null;
     };
-    UnaryOperator<ByteBuffer> symbol = allOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'),
-            chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','),
-            chlit(';'));
-    UnaryOperator<ByteBuffer>
-            character = anyOf(letter, digit, symbol, chlit('_'));
-    UnaryOperator<ByteBuffer> identifier = allOf(letter, opt(anyOf(letter, digit, chlit('_'))));
-    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\'') , chlit('"')), character, repeat(character), chlit('"'));
-    UnaryOperator<ByteBuffer> lhs= identifier;
-    UnaryOperator<ByteBuffer> rhs=anyOf(identifier, terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
-    UnaryOperator<ByteBuffer> optional= confix("[]", rhs);
-    UnaryOperator<ByteBuffer> repeating= confix("{}", rhs);
-    UnaryOperator<ByteBuffer> grouping = confix('(', rhs,')' );
-    UnaryOperator<ByteBuffer> firstOf=allOf(rhs,chlit("|") , rhs);
-    UnaryOperator<ByteBuffer> listOf =allOf(rhs, chlit(','), rhs);
-    UnaryOperator<ByteBuffer> rule = allOf(lhs, chlit("=") , rhs, chlit(";" ));
-    UnaryOperator<ByteBuffer> grammar=repeat(rule);
-
-//     terminal = anyOf(allOf(chlit('\'') , character, repeat(character) , "'" ),allOf( '"' , character, {character} , '"')) ;
-
+    public static final UnaryOperator<ByteBuffer> symbol2 = anyOf("[]{}()<>'\"=|.,;");
+    public static final UnaryOperator<ByteBuffer> symbol = anyOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'), chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','), chlit(';'));
+    public static final UnaryOperator<ByteBuffer> character = anyOf(Ebnf.letter, Ebnf.digit, Ebnf.symbol, chlit('_'));
+    public static final UnaryOperator<ByteBuffer> identifier = allOf(Ebnf.letter, opt(anyOf(Ebnf.letter, Ebnf.digit, chlit('_'))));
+    public static final UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), Ebnf.character, repeat(Ebnf.character), anyOf(chlit('\''), chlit('"')), Ebnf.character, repeat(Ebnf.character), chlit('"'));
+    public static final UnaryOperator<ByteBuffer> lhs = Ebnf.identifier;
+    public static final UnaryOperator<ByteBuffer> optional = confix("[]", Ebnf.rhs);
+    public static final UnaryOperator<ByteBuffer> repeating = confix("{}", Ebnf.rhs);
+    public static final UnaryOperator<ByteBuffer> grouping = confix('(', Ebnf.rhs, ')');
+    public static final UnaryOperator<ByteBuffer> firstOf = allOf(Ebnf.rhs, chlit("|"), Ebnf.rhs);
+    public static final UnaryOperator<ByteBuffer> listOf = allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
+    public static final UnaryOperator<ByteBuffer> rule = allOf(Ebnf.lhs, confix("=;", Ebnf.rhs));
+    public static final UnaryOperator<ByteBuffer> rhs = anyOf(Ebnf.identifier, Ebnf.terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
+    public static final UnaryOperator<ByteBuffer> grammar = repeat(Ebnf.rule);
 
 }
