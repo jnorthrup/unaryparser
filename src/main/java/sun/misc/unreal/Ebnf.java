@@ -37,6 +37,7 @@ import static java.lang.Character.isDigit;
  * | rhs , "|" , rhs
  * | rhs , "," , rhs ;
  * <p>
+ *
  * rule = lhs , "=" , rhs , ";" ;
  * grammar = { rule } ;
  */
@@ -61,19 +62,18 @@ public interface Ebnf {
             chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','),
             chlit(';'));
     UnaryOperator<ByteBuffer>
-            character = anyOf(Ebnf.letter, Ebnf.digit, Ebnf.symbol, chlit('_'));
-    UnaryOperator<ByteBuffer> identifier = allOf(Ebnf.letter, opt(anyOf(Ebnf.letter, Ebnf.digit, chlit('_'))));
-    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), Ebnf.character, repeat(Ebnf.character), anyOf(chlit('\'') , chlit('"')), Ebnf.character, repeat(Ebnf.character), chlit('"'));
-    UnaryOperator<ByteBuffer> lhs= Ebnf.identifier;
-    UnaryOperator<ByteBuffer> rhs=anyOf(Ebnf.identifier, Ebnf.terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
-    UnaryOperator<ByteBuffer> optional=allOf(chlit("[" ), Ebnf.rhs,chlit( "]"));
-    UnaryOperator<ByteBuffer> repeating=allOf(chlit("{"), Ebnf.rhs, chlit("}"));
-    UnaryOperator<ByteBuffer> grouping =allOf(chlit("("), Ebnf.rhs,chlit( ")"));
-    UnaryOperator<ByteBuffer> firstOf=allOf(Ebnf.rhs,chlit("|") , Ebnf.rhs);
-    UnaryOperator<ByteBuffer> listOf =allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
-    UnaryOperator<ByteBuffer> rule = allOf(lhs , chlit("=") , rhs , chlit(";" ));
-    UnaryOperator<ByteBuffer> grammar=repeat(Ebnf.rule);
-            ;
+            character = anyOf(letter, digit, symbol, chlit('_'));
+    UnaryOperator<ByteBuffer> identifier = allOf(letter, opt(anyOf(letter, digit, chlit('_'))));
+    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\'') , chlit('"')), character, repeat(character), chlit('"'));
+    UnaryOperator<ByteBuffer> lhs= identifier;
+    UnaryOperator<ByteBuffer> rhs=anyOf(identifier, terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
+    UnaryOperator<ByteBuffer> optional= confix("[]", rhs);
+    UnaryOperator<ByteBuffer> repeating= confix("{}", rhs);
+    UnaryOperator<ByteBuffer> grouping = confix('(', rhs,')' );
+    UnaryOperator<ByteBuffer> firstOf=allOf(rhs,chlit("|") , rhs);
+    UnaryOperator<ByteBuffer> listOf =allOf(rhs, chlit(','), rhs);
+    UnaryOperator<ByteBuffer> rule = allOf(lhs, chlit("=") , rhs, chlit(";" ));
+    UnaryOperator<ByteBuffer> grammar=repeat(rule);
 
 //     terminal = anyOf(allOf(chlit('\'') , character, repeat(character) , "'" ),allOf( '"' , character, {character} , '"')) ;
 
