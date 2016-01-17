@@ -1,11 +1,13 @@
 package sun.misc.unreal;
 
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
 import static bbcursive.Cursive.post.reset;
 import static bbcursive.Cursive.pre.mark;
 import static bbcursive.Cursive.pre.noop;
+import static bbcursive.Cursive.pre.toEol;
 import static bbcursive.std.*;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
@@ -40,37 +42,71 @@ import static java.lang.Character.isDigit;
  * rule = lhs , "=" , rhs , ";" ;
  * grammar = { rule } ;
  */
-public   interface Ebnf {
-    ;
+public interface Ebnf {
 
-    public static final UnaryOperator<ByteBuffer> letter = b -> {
+
+    UnaryOperator<ByteBuffer> letter = b -> {
         int c = 0;
         if (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
         return 0 < c ? bb(b) : null;
     };
-    public static final UnaryOperator<ByteBuffer> digit = b -> {
+    UnaryOperator<ByteBuffer> digit = b -> {
         int c = 0;
         if (b.hasRemaining() && isDigit(bb(b, mark).get() & 0xff)) c++;
         return 0 >= c ? null : bb(b);
     };
-    public static final UnaryOperator<ByteBuffer> word = b -> {
+    UnaryOperator<ByteBuffer> word = b -> {
         int c = 0;
         while (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
         return 0 < c ? bb(b, b.hasRemaining() ? reset : noop) : null;
     };
-    public static final UnaryOperator<ByteBuffer> symbol2 = anyOf("[]{}()<>'\"=|.,;");
-    public static final UnaryOperator<ByteBuffer> symbol = anyOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'), chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','), chlit(';'));
-    public static final UnaryOperator<ByteBuffer> character = anyOf(Ebnf.letter, Ebnf.digit, Ebnf.symbol, chlit('_'));
-    public static final UnaryOperator<ByteBuffer> identifier = allOf(Ebnf.letter, opt(anyOf(Ebnf.letter, Ebnf.digit, chlit('_'))));
-    public static final UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), Ebnf.character, repeat(Ebnf.character), anyOf(chlit('\''), chlit('"')), Ebnf.character, repeat(Ebnf.character), chlit('"'));
-    public static final UnaryOperator<ByteBuffer> lhs = Ebnf.identifier;
-    public static final UnaryOperator<ByteBuffer> optional = confix("[]", Ebnf.rhs);
-    public static final UnaryOperator<ByteBuffer> repeating = confix("{}", Ebnf.rhs);
-    public static final UnaryOperator<ByteBuffer> grouping = confix('(', Ebnf.rhs, ')');
-    public static final UnaryOperator<ByteBuffer> firstOf = allOf(Ebnf.rhs, chlit("|"), Ebnf.rhs);
-    public static final UnaryOperator<ByteBuffer> listOf = allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
-    public static final UnaryOperator<ByteBuffer> rule = allOf(Ebnf.lhs, confix("=;", Ebnf.rhs));
-    public static final UnaryOperator<ByteBuffer> rhs = anyOf(Ebnf.identifier, Ebnf.terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
-    public static final UnaryOperator<ByteBuffer> grammar = repeat(Ebnf.rule);
+    UnaryOperator<ByteBuffer> symbol  = anyOf("[]{}()<>'\"=|.,;");
+    UnaryOperator<ByteBuffer> symbol2 = anyOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'), chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','), chlit(';'));
+    UnaryOperator<ByteBuffer> character = anyOf(Ebnf.letter, Ebnf.digit, Ebnf.symbol, chlit('_'));
+    UnaryOperator<ByteBuffer> identifier = allOf(Ebnf.letter, opt(anyOf(Ebnf.letter, Ebnf.digit, chlit('_'))));
+    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), Ebnf.character, repeat(Ebnf.character), anyOf(chlit('\''), chlit('"')), Ebnf.character, repeat(Ebnf.character), chlit('"'));
+    UnaryOperator<ByteBuffer> lhs = Ebnf.identifier;
+    UnaryOperator<ByteBuffer> optional = confix("[]", Ebnf.rhs);
+    UnaryOperator<ByteBuffer> repeating = confix("{}", Ebnf.rhs);
+    UnaryOperator<ByteBuffer> grouping = confix('(', Ebnf.rhs, ')');
+    UnaryOperator<ByteBuffer> firstOf = allOf(Ebnf.rhs, chlit("|"), Ebnf.rhs);
+    UnaryOperator<ByteBuffer> listOf = allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
+    UnaryOperator<ByteBuffer> rule = allOf(Ebnf.lhs, confix("=;", Ebnf.rhs));
+    UnaryOperator<ByteBuffer> rhs = anyOf(Ebnf.identifier, Ebnf.terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
+    UnaryOperator<ByteBuffer> grammar = repeat(Ebnf.rule);
 
+    UnaryOperator<ByteBuffer> comments= confix("()",confix("*",grammar));
+    UnaryOperator<ByteBuffer> c_comments= confix("/",confix("*",grammar));
+    UnaryOperator<ByteBuffer> cxx_comments= allOf(strlit("//"),toEol);
+
+
+    enum published {
+        letter,
+        digit,
+        word,
+//        symbol2,
+        symbol,
+        character,
+        identifier,
+        terminal,
+        lhs,
+        optional,
+        repeating,
+        grouping,
+        firstOf,
+        listOf,
+        rule,
+        rhs,
+        grammar;
+
+        private final Method method;
+
+        published(){
+            try {
+                method = Ebnf.class.getMethod(name());
+            } catch (NoSuchMethodException e) {
+                throw new Error("rebind somethig");
+            }
+        }
+    }
 }
