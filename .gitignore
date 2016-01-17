@@ -2,7 +2,8 @@ out
 target
 test-classes
 .idea
-target
+
+
 war
 .settings
 .project
