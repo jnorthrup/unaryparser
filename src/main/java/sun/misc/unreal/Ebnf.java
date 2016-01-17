@@ -1,12 +1,13 @@
 package sun.misc.unreal;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-import static bbcursive.Cursive.post.reset;
-import static bbcursive.Cursive.pre.*;
+import static bbcursive.Cursive.pre.toEol;
 import static bbcursive.std.*;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
@@ -42,78 +43,55 @@ import static java.lang.Character.isDigit;
  * grammar = { rule } ;
  */
 public interface Ebnf {
-
-
-    UnaryOperator<ByteBuffer> letter = b -> {
-        int c = 0;
-        if (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
-        return 0 >= c ? null : bb(b);
-    };
-    UnaryOperator<ByteBuffer> digit = b -> {
-        int c = 0;
-        return !b.hasRemaining() || !isDigit(bb(b, mark).get() & 0xff) ? 0 >= c ? null : bb(b) : 0 >= ++c ? null : bb(b);
-    };
+    UnaryOperator<ByteBuffer> letter = b -> null != b && b.hasRemaining() && isAlphabetic(b.get() & 0xff) ? b : null;
+    UnaryOperator<ByteBuffer> digit = b -> null != b && b.hasRemaining() && isDigit(b.get() & 0xff) ? b : null;
     UnaryOperator<ByteBuffer> word = b -> {
-        int c = 0;
-        while (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
-        return 0 < c ? bb(b, b.hasRemaining() ? reset : noop) : null;
+        if (null == b) return null;
+        boolean rem;
+        while ((rem=b.hasRemaining() )&& isAlphabetic(((ByteBuffer) b.mark()).get() & 0xff)) ;
+        if(rem) {
+            b.reset();
+        }
+        return b;
     };
-    UnaryOperator<ByteBuffer> symbol  = anyOf("[]{}()<>'\"=|.,;");
-    UnaryOperator<ByteBuffer> symbol2 = anyOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'), chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','), chlit(';'));
+    UnaryOperator<ByteBuffer> symbol = anyOf("[]{}()<>'\"=|.,;");
+    UnaryOperator<ByteBuffer> symbol2 = anyOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'),
+            chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','),
+            chlit(';'));
     UnaryOperator<ByteBuffer> character = anyOf(letter, digit, symbol, chlit('_'));
     UnaryOperator<ByteBuffer> identifier = allOf(letter, opt(anyOf(letter, digit, chlit('_'))));
-    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\''), chlit('"')), character, repeat(character), chlit('"'));
+    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\''),
+            chlit('"')), character, repeat(character), chlit('"'));
     UnaryOperator<ByteBuffer> lhs = identifier;
     UnaryOperator<ByteBuffer> optional = confix("[]", Ebnf.rhs);
     UnaryOperator<ByteBuffer> repeating = confix("{}", Ebnf.rhs);
     UnaryOperator<ByteBuffer> grouping = confix('(', Ebnf.rhs, ')');
     UnaryOperator<ByteBuffer> firstOf = allOf(Ebnf.rhs, chlit("|"), Ebnf.rhs);
     UnaryOperator<ByteBuffer> listOf = allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
-    UnaryOperator<ByteBuffer> rule = allOf(lhs, confix("=;", Ebnf.rhs));
+    UnaryOperator<ByteBuffer> rule = buffer -> bb(buffer, allOf(lhs, confix("=;", Ebnf.rhs)));
     UnaryOperator<ByteBuffer> rhs = anyOf(identifier, terminal, optional, repeating, grouping, firstOf, listOf);
     UnaryOperator<ByteBuffer> grammar = repeat(rule);
 
-    UnaryOperator<ByteBuffer> comments= confix("()",confix("*", Ebnf.grammar));
-    UnaryOperator<ByteBuffer> c_comments= confix("/",confix("*", Ebnf.grammar));
-    UnaryOperator<ByteBuffer> cxx_comments= allOf(strlit("//"),toEol);
+    UnaryOperator<ByteBuffer> ebnfComments = confix("()", confix("*", grammar));
+    UnaryOperator<ByteBuffer> cComments = confix("/", confix("*", grammar));
+    UnaryOperator<ByteBuffer> cxxComments = allOf(strlit("//"), toEol);
 
 
-    enum published {
-        letter,
-        digit,
-        word,
-//        symbol2,
-        symbol,
-        character,
-        identifier,
-        terminal,
-        lhs,
-        optional,
-        repeating,
-        grouping,
-        firstOf,
-        listOf,
-        rule,
-        rhs,
-        grammar;
+    enum Lookup {;
+        static Map<UnaryOperator, String> x = new LinkedHashMap<>();
 
-
-        private UnaryOperator lambda;
-
-        published(){
-            try {
-                Object o = Ebnf.class.getField(this.name()).get(null);
-                if (o instanceof UnaryOperator) {
-                    lambda = (UnaryOperator) o;
-                    registry.put(lambda, this);
-                }
-
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+          static String apply(UnaryOperator<ByteBuffer> op) {
+            String s = x.
+                    computeIfAbsent(op, unaryOperator -> {
+                        Field[] declaredFields = Ebnf.class.getDeclaredFields();
+                        for (Field declaredField : declaredFields)
+                            try {
+                                if (Objects.equals(op, declaredField.get(null))) return declaredField.getName();
+                            } catch (IllegalAccessException e) {
+                            }
+                        return op.toString();
+                    });
+            return s;
         }
     }
-    Map<UnaryOperator,published> registry = new LinkedHashMap< >();
 }
