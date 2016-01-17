@@ -1,13 +1,12 @@
 package sun.misc.unreal;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
 import static bbcursive.Cursive.post.reset;
-import static bbcursive.Cursive.pre.mark;
-import static bbcursive.Cursive.pre.noop;
-import static bbcursive.Cursive.pre.toEol;
+import static bbcursive.Cursive.pre.*;
 import static bbcursive.std.*;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
@@ -48,12 +47,11 @@ public interface Ebnf {
     UnaryOperator<ByteBuffer> letter = b -> {
         int c = 0;
         if (b.hasRemaining() && isAlphabetic(bb(b, mark).get() & 0xff)) c++;
-        return 0 < c ? bb(b) : null;
+        return 0 >= c ? null : bb(b);
     };
     UnaryOperator<ByteBuffer> digit = b -> {
         int c = 0;
-        if (b.hasRemaining() && isDigit(bb(b, mark).get() & 0xff)) c++;
-        return 0 >= c ? null : bb(b);
+        return !b.hasRemaining() || !isDigit(bb(b, mark).get() & 0xff) ? 0 >= c ? null : bb(b) : 0 >= ++c ? null : bb(b);
     };
     UnaryOperator<ByteBuffer> word = b -> {
         int c = 0;
@@ -62,21 +60,21 @@ public interface Ebnf {
     };
     UnaryOperator<ByteBuffer> symbol  = anyOf("[]{}()<>'\"=|.,;");
     UnaryOperator<ByteBuffer> symbol2 = anyOf(chlit('['), chlit(']'), chlit('{'), chlit('}'), chlit('('), chlit(')'), chlit('<'), chlit('>'), chlit('\''), chlit('"'), chlit('='), chlit('|'), chlit('.'), chlit(','), chlit(';'));
-    UnaryOperator<ByteBuffer> character = anyOf(Ebnf.letter, Ebnf.digit, Ebnf.symbol, chlit('_'));
-    UnaryOperator<ByteBuffer> identifier = allOf(Ebnf.letter, opt(anyOf(Ebnf.letter, Ebnf.digit, chlit('_'))));
-    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), Ebnf.character, repeat(Ebnf.character), anyOf(chlit('\''), chlit('"')), Ebnf.character, repeat(Ebnf.character), chlit('"'));
-    UnaryOperator<ByteBuffer> lhs = Ebnf.identifier;
+    UnaryOperator<ByteBuffer> character = anyOf(letter, digit, symbol, chlit('_'));
+    UnaryOperator<ByteBuffer> identifier = allOf(letter, opt(anyOf(letter, digit, chlit('_'))));
+    UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\''), chlit('"')), character, repeat(character), chlit('"'));
+    UnaryOperator<ByteBuffer> lhs = identifier;
     UnaryOperator<ByteBuffer> optional = confix("[]", Ebnf.rhs);
     UnaryOperator<ByteBuffer> repeating = confix("{}", Ebnf.rhs);
     UnaryOperator<ByteBuffer> grouping = confix('(', Ebnf.rhs, ')');
     UnaryOperator<ByteBuffer> firstOf = allOf(Ebnf.rhs, chlit("|"), Ebnf.rhs);
     UnaryOperator<ByteBuffer> listOf = allOf(Ebnf.rhs, chlit(','), Ebnf.rhs);
-    UnaryOperator<ByteBuffer> rule = allOf(Ebnf.lhs, confix("=;", Ebnf.rhs));
-    UnaryOperator<ByteBuffer> rhs = anyOf(Ebnf.identifier, Ebnf.terminal, Ebnf.optional, Ebnf.repeating, Ebnf.grouping, Ebnf.firstOf, Ebnf.listOf);
-    UnaryOperator<ByteBuffer> grammar = repeat(Ebnf.rule);
+    UnaryOperator<ByteBuffer> rule = allOf(lhs, confix("=;", Ebnf.rhs));
+    UnaryOperator<ByteBuffer> rhs = anyOf(identifier, terminal, optional, repeating, grouping, firstOf, listOf);
+    UnaryOperator<ByteBuffer> grammar = repeat(rule);
 
-    UnaryOperator<ByteBuffer> comments= confix("()",confix("*",grammar));
-    UnaryOperator<ByteBuffer> c_comments= confix("/",confix("*",grammar));
+    UnaryOperator<ByteBuffer> comments= confix("()",confix("*", Ebnf.grammar));
+    UnaryOperator<ByteBuffer> c_comments= confix("/",confix("*", Ebnf.grammar));
     UnaryOperator<ByteBuffer> cxx_comments= allOf(strlit("//"),toEol);
 
 
@@ -99,14 +97,23 @@ public interface Ebnf {
         rhs,
         grammar;
 
-        private final Method method;
+
+        private UnaryOperator lambda;
 
         published(){
             try {
-                method = Ebnf.class.getMethod(name());
-            } catch (NoSuchMethodException e) {
-                throw new Error("rebind somethig");
+                Object o = Ebnf.class.getField(this.name()).get(null);
+                if (o instanceof UnaryOperator) {
+                    lambda = (UnaryOperator) o;
+                    registry.put(lambda, this);
+                }
+
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
     }
+    Map<UnaryOperator,published> registry = new LinkedHashMap< >();
 }
