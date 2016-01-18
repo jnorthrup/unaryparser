@@ -8,6 +8,7 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class symbol {
+public enum symbol {
+    ;
     public static final UnaryOperator<ByteBuffer> symbol = anyOf.anyOf("[]{}()<>'\"=|.,;");
 }

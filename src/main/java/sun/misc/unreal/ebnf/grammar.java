@@ -8,6 +8,7 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class grammar {
+public enum grammar {
+    ;
     public static final UnaryOperator<ByteBuffer> grammar = repeat.repeat(rule.rule);
 }

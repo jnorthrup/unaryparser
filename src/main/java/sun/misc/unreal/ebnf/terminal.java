@@ -10,7 +10,8 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class terminal {
+public enum terminal {
+    ;
     public static final UnaryOperator<ByteBuffer> terminal = anyOf.anyOf(chlit.chlit('\''), character.character, repeat.repeat(character.character), anyOf.anyOf(chlit.chlit('\''),
             chlit.chlit('"')), character.character, repeat.repeat(character.character), chlit.chlit('"'));
 }

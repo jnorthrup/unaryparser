@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class character {
+public enum character {
+    ;
     public static final UnaryOperator<ByteBuffer> character = anyOf.anyOf(letter.letter, digit.digit, symbol.symbol, chlit.chlit('_'));
 }

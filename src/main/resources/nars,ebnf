@@ -1,18 +1,18 @@
 
-             task ::= [budget] sentence
+             task = [budget] sentence;
 
-         sentence ::= statement"." [tense] [truth]
+         sentence = statement"." [tense] [truth]
                     | statement"?" [tense] [truth]
                     | statement"@" [tense] [truth]
                     | statement"!" [tense] [truth]  ;
 
-        statement ::= "<"term copula term">"
+        statement = "<"term copula term">"
                     | "("term copula term")"
                     | "+++"   term
-                    | "(^" word {","term} ")"
-                    | word"("term {","term} ")"  ;
+                    | "(^" word { "," term} ")"
+                    | word"("term { "," term} ")"  ;
 
-           copula ::= "-->"
+           copula = "-->"
                     | "<->"
                     | "{--"
                     | "--]"
@@ -25,13 +25,13 @@
                     | "</>"
                     | "<|>"       ;
 
-             term ::= word
+             term = word
                     | variable
                     | compoundTerm
                     | statement
                     | interval       ;
 
-    compoundTerm ::= "{" term {","term} "}"
+    compoundTerm = "{" term {","term} "}"
                     | "[" term {","term} "]"
                     | "("infixOpMulti","term{","term} ")"
                     | "("infixOpSingle","term"," term ")"
@@ -44,7 +44,7 @@
                     | "(" term {infixOpMulti  term} ")"
                     | "(" term infixOpSingle term ")"   ;
 
-   infixOpMulti ::= "&&"
+   infixOpMulti = "&&"
                     | "*"
                     | "||"
                     | "&|"
@@ -52,27 +52,27 @@
                     | "|"
                     | "&"
 
-  infixOpSingle ::= "-"
+  infixOpSingle = "-"
                     | "~"                     ;
 
-         variable ::= "$"word
+         variable = "$"word
                     | "#"[word]
                     | "?"[word]      ;
 
-            tense ::= ":/:"
+            tense = ":/:"
                     | ":|:"
                     | ":\\:"
                     | <":">       ;
 
-         interval ::= <"/">            ;
+         interval = <"/">            ;
 
-            truth ::= <"%">frequency[<";">confidence]<"%">
-           budget ::= <"$">priority[<";">durability][<";">quality]<"$">
+            truth = <"%">frequency[<";">confidence]<"%">
+           budget = <"$">priority[<";">durability][<";">quality]<"$">
            ;
 
-               word ::= "\w+"                         ;
-           priority ::= "([0]?\.[0-9]+|1|0)"          ;
-         durability ::= "[0]?\.[0]*[1-9]{1}[0-9]*"    ;
-            quality ::= "([0]?\.[0-9]+|1|0)"          ;
-          frequency ::= "([0]?\.[0-9]+|1|0)"          ;
-         confidence ::= "[0]?\.[0]*[1-9]{1}[0-9]*"    ;
+               word = "\w+"                         ;
+           priority = "([0]?\.[0-9]+|1|0)"          ;
+         durability = "[0]?\.[0]*[1-9]{1}[0-9]*"    ;
+            quality = "([0]?\.[0-9]+|1|0)"          ;
+          frequency = "([0]?\.[0-9]+|1|0)"          ;
+         confidence = "[0]?\.[0]*[1-9]{1}[0-9]*"    ;

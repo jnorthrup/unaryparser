@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class listOf {
+public enum listOf {
+    ;
     public static final UnaryOperator<ByteBuffer> listOf = allOf.allOf(rhs.rhs, chlit.chlit(','), rhs.rhs);
 }

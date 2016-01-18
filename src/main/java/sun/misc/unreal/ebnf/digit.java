@@ -8,6 +8,7 @@ import static java.lang.Character.isDigit;
 /**
  * Created by jim on 1/17/16.
  */
-public class digit {
+public enum digit {
+    ;
     public static final UnaryOperator<ByteBuffer> digit = b -> null != b && b.hasRemaining() && isDigit(b.get() & 0xff) ? b : null;
 }

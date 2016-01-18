@@ -8,6 +8,7 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class grouping {
+public enum grouping {
+    ;
     public static final UnaryOperator<ByteBuffer> grouping = confix.confix('(', rhs.rhs, ')');
 }

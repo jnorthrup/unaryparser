@@ -11,6 +11,7 @@ import static bbcursive.std.bb;
 /**
  * Created by jim on 1/17/16.
  */
-public class rule {
+public enum rule {
+    ;
     public static final UnaryOperator<ByteBuffer> rule = buffer -> bb(buffer, allOf.allOf(lhs.lhs, confix.confix("=;", rhs.rhs)));
 }

@@ -8,6 +8,7 @@ import java.util.function.UnaryOperator;
 /**
  * Created by jim on 1/17/16.
  */
-public class optional {
+public enum optional {
+    ;
     public static final UnaryOperator<ByteBuffer> optional = confix.confix("[]", rhs.rhs);
 }
