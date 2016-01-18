@@ -24,8 +24,6 @@ public class EbnfTest extends TestCase {
 
         System.err.println(""+getClass().getResource("/nars.ebnf") );
 
-
-
     };
     @Test
     public void testConfix() {
