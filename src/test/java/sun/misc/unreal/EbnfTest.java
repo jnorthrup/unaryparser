@@ -1,13 +1,15 @@
 package sun.misc.unreal;
 
+import bbcursive.lib.confix;
 import bbcursive.std;
 import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static bbcursive.std.confix;
-import static sun.misc.unreal.Ebnf.letter;
+import static bbcursive.lib.chlit.chlit;
+import static sun.misc.unreal.ebnf.letter.letter;
+import static sun.misc.unreal.ebnf.word.word;
 
 /**
  * Created by jim on 1/16/16.
@@ -17,23 +19,20 @@ public class EbnfTest extends TestCase{
     @Test public  void testConfix() {
         ByteBuffer wrap;
         wrap = ByteBuffer.wrap("a=b;".getBytes());
-        assertNotNull( std.bb(wrap,   EbnfPublish.letter) ) ;
-        assertNotNull( std.bb(wrap,   confix("=;", letter))) ;
-        assertNotNull( std.bb(wrap,   EbnfPublish.letter, confix("=;", letter))) ;
-        assertNotNull( std.bb(wrap,   EbnfPublish.letter, confix("=;", letter))) ;
+        assertNotNull( std.bb(wrap,    letter, confix.confix("=;", letter))) ;
     }
 
     @Test public  void testWord() {
         ByteBuffer wrap;
         wrap = ByteBuffer.wrap("aa".getBytes());
-        ByteBuffer bb = std.bb(wrap, EbnfPublish.word);
+        ByteBuffer bb = std.bb(wrap, word);
         assertNotNull(bb);
     }
 
     @Test
     public  void testLetter() {
         ByteBuffer wrap = ByteBuffer.wrap("a".getBytes());
-        assertNotNull(std.bb(wrap, std.chlit("a")));
+        assertNotNull(std.bb(wrap, chlit("a")));
     }
 //
 //    @Override
