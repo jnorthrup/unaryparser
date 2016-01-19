@@ -1,6 +1,8 @@
 package sun.misc.unreal.ebnf;
 
-import bbcursive.lib.allOf;
+import bbcursive.ann.Backtracking;
+import bbcursive.ann.Skipper;
+import bbcursive.lib.allOf_;
 import bbcursive.lib.confix_;
 
 import java.nio.ByteBuffer;
@@ -13,5 +15,12 @@ import static bbcursive.std.bb;
  */
 public enum rule_ {
     ;
-    public static final UnaryOperator<ByteBuffer> rule = buffer -> bb(buffer, allOf.allOf(lhs_.lhs, confix_.confix("=;", rhs_.rhs)));
+    public static final UnaryOperator<ByteBuffer> rule = new ByteBufferUnaryOperator();
+@Skipper@Backtracking
+    private static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
+        @Override
+        public ByteBuffer apply(ByteBuffer buffer) {
+            return bb(buffer, allOf_.allOf(lhs_.lhs, confix_.confix("=;", rhs_.rhs)));
+        }
+    }
 }

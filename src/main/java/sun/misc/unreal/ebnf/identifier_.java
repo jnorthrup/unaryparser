@@ -1,6 +1,6 @@
 package sun.misc.unreal.ebnf;
 
-import bbcursive.lib.allOf;
+import bbcursive.lib.allOf_;
 import bbcursive.lib.anyOf_;
 import bbcursive.lib.chlit_;
 import bbcursive.lib.opt;
@@ -13,5 +13,5 @@ import java.util.function.UnaryOperator;
  */
 public enum identifier_ {
     ;
-    public static final UnaryOperator<ByteBuffer> identifier = allOf.allOf(letter_.letter, opt.opt(anyOf_.anyOf(letter_.letter, digit_.digit, chlit_.chlit('_'))));
+    public static final UnaryOperator<ByteBuffer> identifier = allOf_.allOf(letter_.letter, opt.opt(anyOf_.anyOf(letter_.letter, digit_.digit, chlit_.chlit('_'))));
 }
