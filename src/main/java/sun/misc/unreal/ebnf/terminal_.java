@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 import static bbcursive.lib.anyOf_.anyOf;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.repeat_.repeat;
+import static bbcursive.std.bb;
 import static sun.misc.unreal.ebnf.character_.*;
 
 /**
@@ -16,7 +17,20 @@ import static sun.misc.unreal.ebnf.character_.*;
  */
 public enum terminal_ {
     ;
-    @Skipper@Backtracking
-    public static final UnaryOperator<ByteBuffer> terminal = anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\''),
-            chlit('"')), character, repeat(character), chlit('"'));
+
+    public static final UnaryOperator<ByteBuffer> terminal() {
+        return new ByteBufferUnaryOperator();
+    }
+    @Skipper
+    @Backtracking
+      static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
+        @Override
+        public ByteBuffer apply(ByteBuffer buffer) {
+            return bb(buffer, anyOf(chlit('\''), character, repeat(character), anyOf(chlit('\''),
+                    chlit('"')), character, repeat(character), chlit('"')));
+        }
+    }
+
+
+
 }

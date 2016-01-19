@@ -1,17 +1,11 @@
 package sun.misc.unreal;
 
 import bbcursive.lib.confix_;
-import bbcursive.std.traits;
-import bbcursive.vtables._edge;
-import bbcursive.vtables._ptr;
 import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.std.bb;
@@ -25,11 +19,11 @@ import static sun.misc.unreal.ebnf.word_.word;
  */
 public class EbnfTest extends TestCase {
     public static final String nars =
-                "         task = [budget] sentence;\n" +
-                "         sentence = statement\".\" [tense] [truth]\n" +
-                "                    | statement\"?\" [tense] [truth]\n" +
-                "                    | statement\"@\" [tense] [truth]\n" +
-                "                    | statement\"!\" [tense] [truth]  ;\n" ;
+                " task = [budget] sentence;\n" +
+                " sentence = statement\".\" [tense] [truth]\n" +
+                "            | statement\"?\" [tense] [truth]\n" +
+                "            | statement\"@\" [tense] [truth]\n" +
+                "            | statement\"!\" [tense] [truth]  ;\n" ;
     @Test public static void testNars() throws URISyntaxException {/*
         std.flags.get().put(traits.skipWs, Boolean.TRUE);
         std.flags.get().put(traits.backtrackOnNull, Boolean.TRUE);
@@ -39,22 +33,7 @@ public class EbnfTest extends TestCase {
 
         bb = bb(nars, grammar);
         TestCase.assertNotNull(bb);
-        Consumer<_edge<_edge<Set<traits>, _edge<UnaryOperator<ByteBuffer>, Integer>>, _ptr>> tConsumer;
-        tConsumer = edge_ptr_edge -> {
-            // shake the tree in intellij.  exhaust core(), location() fanout for a representational constant
-            // automate later.
-            _edge<_edge<Set<traits>, _edge<UnaryOperator<ByteBuffer>, Integer>>, _ptr> edge_ptr_edge1 = edge_ptr_edge;
-            _ptr location = edge_ptr_edge1.location();
-            Integer startPosition = location.location();
-            ByteBuffer byteBuffer = location.core();
-            _edge<Set<traits>, _edge<UnaryOperator<ByteBuffer>, Integer>> set_edge_edge = edge_ptr_edge1.core();
-            Set<traits> traitsSet = set_edge_edge.core();
-            _edge<UnaryOperator<ByteBuffer>, Integer> operatorIntegerEdge = set_edge_edge.location();
-            Integer endPosition = operatorIntegerEdge.location();
-            UnaryOperator<ByteBuffer> unaryOperator = operatorIntegerEdge.core();
 
-            System.err.println("+++ " + unaryOperator + " " + new Integer[]{startPosition, endPosition}.toString() + " " + traitsSet);
-        };
 
     }
 
