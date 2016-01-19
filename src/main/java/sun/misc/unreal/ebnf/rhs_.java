@@ -10,5 +10,5 @@ import java.util.function.UnaryOperator;
  */
 public enum rhs_ {
     ;
-    public static final UnaryOperator<ByteBuffer> rhs = anyOf_.anyOf(identifier_.identifier, terminal_.terminal, optional_.optional, repeating_.repeating, grouping_.grouping, firstOf.firstOf, listOf_.listOf);
+    public static final UnaryOperator<ByteBuffer> rhs = anyOf_.anyOf(identifier_.identifier, terminal_.terminal, optional_.optional, repeating_.repeating, grouping_.grouping, firstOf_.firstOf, listOf_.listOf);
 }

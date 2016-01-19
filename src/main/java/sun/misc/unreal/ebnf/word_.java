@@ -11,7 +11,7 @@ import static java.lang.Character.isAlphabetic;
 /**
  * Created by jim on 1/17/16.
  */
-public enum word {
+public enum word_ {
     ;
     public static final UnaryOperator<ByteBuffer> word = new ByteBufferUnaryOperator();
 

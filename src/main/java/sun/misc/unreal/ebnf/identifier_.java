@@ -13,5 +13,5 @@ import java.util.function.UnaryOperator;
  */
 public enum identifier_ {
     ;
-    public static final UnaryOperator<ByteBuffer> identifier = allOf.allOf(letter_.letter, opt.opt(anyOf_.anyOf(letter_.letter, digit.digit, chlit_.chlit('_'))));
+    public static final UnaryOperator<ByteBuffer> identifier = allOf.allOf(letter_.letter, opt.opt(anyOf_.anyOf(letter_.letter, digit_.digit, chlit_.chlit('_'))));
 }

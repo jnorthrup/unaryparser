@@ -18,7 +18,7 @@ import static bbcursive.std.bb;
 import static sun.misc.unreal.ebnf.grammar_.grammar;
 import static sun.misc.unreal.ebnf.letter_.letter;
 import static sun.misc.unreal.ebnf.terminal_.terminal;
-import static sun.misc.unreal.ebnf.word.word;
+import static sun.misc.unreal.ebnf.word_.word;
 
 /**
  * Created by jim on 1/16/16.
