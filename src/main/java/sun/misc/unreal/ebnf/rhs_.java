@@ -31,7 +31,7 @@ public enum rhs_ {
     static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
-            return bb(buffer, anyOf(identifier_.identifier, terminal_.terminal(), optional, repeating, grouping, firstOf, listOf));
+            return bb(buffer, anyOf(identifier_.identifier, terminal_.terminal(), optional, repeating(), grouping, firstOf, listOf));
         }
     }
 }
