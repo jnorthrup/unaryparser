@@ -11,5 +11,5 @@ import static sun.misc.unreal.ebnf.rhs_.*;
  */
 public enum grouping_ {
     ;
-    public static final UnaryOperator<ByteBuffer> grouping = confix('(', rhs, ')');
+    public static final UnaryOperator<ByteBuffer> grouping = confix('(', rhs(), ')');
 }

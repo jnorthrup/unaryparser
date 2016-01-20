@@ -20,7 +20,7 @@ public enum rule_ {
     private static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
-            return bb(buffer, allOf_.allOf(lhs_.lhs, confix_.confix("=;", rhs_.rhs)));
+            return bb(buffer, allOf_.allOf(lhs_.lhs, confix_.confix("=;", rhs_.rhs())));
         }
     }
 }

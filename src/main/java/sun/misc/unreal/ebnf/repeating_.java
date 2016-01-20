@@ -10,5 +10,5 @@ import java.util.function.UnaryOperator;
  */
 public enum repeating_ {
     ;
-    public static final UnaryOperator<ByteBuffer> repeating = confix_.confix("{}", rhs_.rhs);
+    public static final UnaryOperator<ByteBuffer> repeating = confix_.confix("{}", rhs_.rhs());
 }

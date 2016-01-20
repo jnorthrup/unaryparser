@@ -10,5 +10,5 @@ import java.util.function.UnaryOperator;
  */
 public enum optional_ {
     ;
-    public static final UnaryOperator<ByteBuffer> optional = confix_.confix("[]", rhs_.rhs);
+    public static final UnaryOperator<ByteBuffer> optional = confix_.confix("[]", rhs_.rhs());
 }

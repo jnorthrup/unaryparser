@@ -15,14 +15,13 @@ public enum word_ {
     ;
     public static final UnaryOperator<ByteBuffer> word = new ByteBufferUnaryOperator();
 
-
     @Infix@Backtracking
-    private static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
+     static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
         @Override
         public ByteBuffer apply(ByteBuffer b) {
             if (null == b) return null;
             boolean rem;
-            while ((rem = b.hasRemaining()) && isAlphabetic(((ByteBuffer) b.mark()).get() & 0xff)) ;
+            while ((rem = b.hasRemaining()) && isAlphabetic(((ByteBuffer)b.mark()).get() & 0xff)) ;
             if (rem) {
                 b.reset();
             }

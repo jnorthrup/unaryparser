@@ -1,6 +1,7 @@
 package sun.misc.unreal;
 
 import bbcursive.lib.confix_;
+import bbcursive.std;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import java.nio.ByteBuffer;
 
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.std.bb;
+import static bbcursive.std.flags;
 import static sun.misc.unreal.ebnf.grammar_.grammar;
 import static sun.misc.unreal.ebnf.letter_.letter;
 import static sun.misc.unreal.ebnf.terminal_.terminal;
@@ -28,20 +30,28 @@ public class EbnfTest extends TestCase {
         std.flags.get().put(traits.skipWs, Boolean.TRUE);
         std.flags.get().put(traits.backtrackOnNull, Boolean.TRUE);
         std.flags.get().put(traits.debug, Boolean.TRUE);*/
-        ByteBuffer bb = bb(nars, terminal);
-        TestCase.assertNotNull(bb);
+        flags.get().add(std.traits.skipWs);
+        flags.get().add(std.traits.backtrackOnNull);
 
+
+        ByteBuffer bb = bb(nars, terminal());
+        TestCase.assertNotNull(bb);
         bb = bb(nars, grammar);
         TestCase.assertNotNull(bb);
-
-
     }
 
     @Test
     public void testConfix() {
         ByteBuffer wrap;
-        wrap = ByteBuffer.wrap("a=b;".getBytes());
-        TestCase.assertNotNull(bb(wrap, letter, confix_.confix("=;", letter)));
+        flags.get().clear();
+        TestCase.assertNotNull(bb( "a=b;", letter, confix_.confix("=;", letter)));
+        System.err.println("-----");
+        flags.get().add(std.traits.skipWs);
+        flags.get().add(std.traits.backtrackOnNull);
+        TestCase.assertNotNull(bb( "a=b;", letter, confix_.confix("=;", letter)));
+        System.err.println("-----");
+        flags.get().clear();
+        TestCase.assertNotNull(bb( "a=b;", letter, confix_.confix("=;", letter)));
     }
 
     @Test
