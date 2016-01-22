@@ -19,8 +19,10 @@
  | <variable>                         // an atomic variable term
  | <compound-term>                    // a term with internal structure
  | <statement>                        // a statement can serve as a term
- <compound-term> ::= "{" <term> {","<term>} "}"         // extensional set
+ <compound-term> ::=
+   "{" <term> {","<term>} "}"         // extensional set
  | "[" <term> {","<term>} "]"         // intensional set
+ | "(--," <term> ")"                  // negation
  | "(&," <term> {","<term>} ")"       // extensional intersection
  | "(|," <term> {","<term>} ")"       // intensional intersection
  | "(-," <term> "," <term> ")"        // extensional difference
@@ -28,12 +30,12 @@
  | "(*," <term> {","<term>} ")"       // product
  | "(/," <term> {","<term>} ")"       // extensional image
  | "(\," <term> {","<term>} ")"       // intensional image
- | "(--," <term> ")"                  // negation
  | "(||," <term> {","<term>} ")"      // disjunction
  | "(&&," <term> {","<term>} ")"      // conjunction
  | "(&/," <term> {","<term>} ")"      // sequential events
  | "(&|," <term> {","<term>} ")"      // parallel events
- <tense> ::= ":/:"            // future event
+ <tense> ::=
+ ":/:"            // future event
  | ":|:"  // present event
  | ":\:"  // past event
 
