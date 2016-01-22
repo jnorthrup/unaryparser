@@ -7,8 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
+import static bbcursive.lib.allOf_.allOf;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.confix_.confix;
+import static bbcursive.lib.opt_.opt;
 import static bbcursive.lib.repeat_.repeat;
 import static bbcursive.lib.skipper_.skipper;
 import static bbcursive.lib.strlit.strlit;
@@ -258,11 +260,10 @@ public interface nars {
         return null;
     }
 
-    UnaryOperator<ByteBuffer>
-            negation = confix(strlit("(--"), chlit(')'), nars.term());
+    UnaryOperator<ByteBuffer> negation = confix(strlit("(--"), chlit(')'), nars.term());
     UnaryOperator<ByteBuffer> extensionaldifference = confix(strlit("(-"), chlit(')'), confix(term(), term(), chlit(',')));
     UnaryOperator<ByteBuffer> intensionaldifference = confix(strlit("(~"), chlit(')'), confix(term(), term(), chlit(',')));
-    UnaryOperator<ByteBuffer> intensionalset = confix("[]", termListTail());
+    UnaryOperator<ByteBuffer> intensionalset = confix("[]", allOf(term(), opt(termListTail()) ));
 
     @NotNull
     static UnaryOperator<ByteBuffer> termListTail() {
