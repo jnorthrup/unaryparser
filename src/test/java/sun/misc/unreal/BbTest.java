@@ -21,16 +21,6 @@ public class BbTest extends TestCase {
 
 
     @Test
-    public void testRepeat(){
-
-
-
-        ByteBuffer aaa = std.bb("aaa", repeat_.repeat(chlit('a')));
-        assertNotNull(aaa);
-
-    }
-
-    @Test
     public void testConfix() {
         ByteBuffer wrap;
         flags.get().clear();
