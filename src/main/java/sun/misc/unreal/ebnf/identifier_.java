@@ -1,17 +1,33 @@
 package sun.misc.unreal.ebnf;
 
-import bbcursive.lib.allOf_;
-import bbcursive.lib.anyOf_;
-import bbcursive.lib.chlit_;
-import bbcursive.lib.opt_;
-
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
+
+import static bbcursive.lib.allOf_.allOf;
+import static bbcursive.lib.anyOf_.anyOf;
+import static bbcursive.lib.chlit_.chlit;
+import static bbcursive.lib.repeat_.repeat;
+import static bbcursive.std.bb;
+import static sun.misc.unreal.ebnf.digit_.digit;
+import static sun.misc.unreal.ebnf.letter_.letter;
 
 /**
  * Created by jim on 1/17/16.
  */
 public enum identifier_ {
     ;
-    public static final UnaryOperator<ByteBuffer> identifier = allOf_.allOf(letter_.letter, opt_.opt(anyOf_.anyOf(letter_.letter, digit_.digit, chlit_.chlit('_'))));
+    public static final UnaryOperator<ByteBuffer> identifier (){
+
+        return new UnaryOperator<ByteBuffer>() {
+        @Override
+        public String toString() {
+            return "identifier";
+        }
+
+        @Override
+        public ByteBuffer apply(ByteBuffer buffer) {
+            return bb(buffer,allOf(letter, repeat(anyOf(letter, digit, chlit('_')))));
+        }
+    };}
+
 }

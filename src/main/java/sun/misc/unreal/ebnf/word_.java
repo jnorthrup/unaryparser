@@ -19,13 +19,15 @@ public enum word_ {
      static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
         @Override
         public ByteBuffer apply(ByteBuffer b) {
-            if (null == b) return null;
-            boolean rem;
-            while ((rem = b.hasRemaining()) && isAlphabetic(((ByteBuffer)b.mark()).get() & 0xff)) ;
-            if (rem) {
-                b.reset();
+            if (null != b) {
+                boolean rem;
+                while ((rem = b.hasRemaining()) && isAlphabetic(((ByteBuffer) b.mark()).get() & 0xff)) ;
+                if (rem) {
+                    b.reset();
+                }
+                return b;
             }
-            return b;
+            return null;
         }
     }
 }

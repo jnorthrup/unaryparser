@@ -10,5 +10,15 @@ import static java.lang.Character.isDigit;
  */
 public enum digit_ {
     ;
-    public static final UnaryOperator<ByteBuffer> digit = b -> null != b && b.hasRemaining() && isDigit(b.get() & 0xff) ? b : null;
+    public static final UnaryOperator<ByteBuffer> digit = new UnaryOperator<ByteBuffer>() {
+        @Override
+        public String toString() {
+            return "digit";
+        }
+
+        @Override
+        public ByteBuffer apply(ByteBuffer b) {
+            return null != b && b.hasRemaining() && isDigit(b.get() & 0xff) ? b : null;
+        }
+    };
 }
