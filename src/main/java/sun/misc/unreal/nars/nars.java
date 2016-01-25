@@ -1,25 +1,24 @@
 package sun.misc.unreal.nars;
 
-import bbcursive.ann.Backtracking;
-import bbcursive.ann.Infix;
-import org.jetbrains.annotations.NotNull;
-
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
 import static bbcursive.lib.allOf_.allOf;
+import static bbcursive.lib.anyOf_.anyOf;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.confix_.confix;
+import static bbcursive.lib.infix_.infix;
 import static bbcursive.lib.opt_.opt;
 import static bbcursive.lib.repeat_.repeat;
 import static bbcursive.lib.skipper_.skipper;
 import static bbcursive.lib.strlit.strlit;
+import static sun.misc.unreal.ebnf.word_.word;
 
 /**
  * Created by jim on 1/20/16.
  */
 public interface nars {
-
+    ;
 
     /* sentence type and delimitors */
     /* variable type */
@@ -55,10 +54,10 @@ public interface nars {
     UnaryOperator<ByteBuffer> TENSE_PAST = strlit(":\\:");
     UnaryOperator<ByteBuffer> TENSE_PRESENT = strlit(":|:");
     UnaryOperator<ByteBuffer> TENSE_FUTURE = strlit(":/:");
-    UnaryOperator<ByteBuffer> BYTE_BUFFER_UNARY_OPERATOR = repeat(skipper(chlit(','), term()));
+    UnaryOperator<ByteBuffer> TERMLISTTAIL = skipper(repeat(chlit(','), term()));
 
 
-    enum Operator {
+    enum Operator implements UnaryOperator<ByteBuffer> {
         /* CompountTerm operators, length = 1 */
         INTERSECTION_EXT {
             @Override
@@ -134,10 +133,10 @@ public interface nars {
                 return "&|";
             }
         };
-        UnaryOperator<ByteBuffer> b = strlit(toString());
 
-        public UnaryOperator<ByteBuffer> op() {
-            return b;
+
+        public ByteBuffer apply(ByteBuffer o) {
+            return strlit(toString()).apply(o);
         }
     }
 
@@ -164,7 +163,7 @@ public interface nars {
     UnaryOperator<ByteBuffer> SEQUENCE_OPERATOR = strlit("&/");
     UnaryOperator<ByteBuffer> PARALLEL_OPERATOR = strlit("&|");
 
-    enum Relation {
+    enum Relation implements UnaryOperator {
         INHERITANCE {
             @Override
             public String toString() {
@@ -237,47 +236,76 @@ public interface nars {
                 return "<|>";
             }
         };
-        UnaryOperator<ByteBuffer> b = strlit(toString());
 
-        public UnaryOperator<ByteBuffer> op() {
-            return b;
+        @Override
+        public ByteBuffer apply(Object o) {
+            return strlit(this.toString()).apply((ByteBuffer) o);
         }
+    }
+
+    static UnaryOperator<ByteBuffer> copula() {
+        return anyOf(Relation.values());
+    }
+
+    UnaryOperator<ByteBuffer> negation = confix(strlit("(--"), chlit(')'), term());
+    UnaryOperator<ByteBuffer> extensionaldifference = confix(strlit("(-"), chlit(')'), confix(term(), term(), chlit(',')));
+    UnaryOperator<ByteBuffer> intensionaldifference = confix(strlit("(~"), chlit(')'), confix(term(), term(), chlit(',')));
+    UnaryOperator<ByteBuffer> intensionalset = confix("[]", allOf(term(), opt(TERMLISTTAIL)));
+    UnaryOperator<ByteBuffer> extensionalset = confix("{}", TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> intensionalintersection = confix(strlit("(|"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> extensionalintersection = confix(strlit("(&"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> product = confix(strlit("(*"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> extensionalimage = confix(strlit("(/"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> intensionalimage = confix(strlit("(\\"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> disjunction = confix(strlit("(||"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> conjunction = confix(strlit("(&&"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> sequentialevents = confix(strlit("(&/"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> parallelevents = confix(strlit("(&|"), chlit(")"), TERMLISTTAIL);
+    UnaryOperator<ByteBuffer> statement = anyOf(confix("<>", skipper(term(), copula(), term())), allOf(strlit("@$|!LexMe!|$@"), term()), confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL))),
+            variable = infix(anyOf("#?$"), word),
+            tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT),
+            val = infix(allOf(opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456")))),
+            frequency = val,
+            confidence = val, priority = val, durability = val,
+
+    truth = confix("%", skipper(frequency, opt(chlit(';'),confidence))),
+    budget = confix("$", skipper(priority, opt(chlit(';'),durability))),
+    compoundTerm=anyOf(
+            negation,
+            extensionaldifference,
+            intensionaldifference,
+            intensionalset,
+            extensionalset,
+            intensionalintersection,
+            extensionalintersection,
+            product,
+            extensionalimage,
+            intensionalimage,
+            disjunction,
+            conjunction,
+            sequentialevents,
+            parallelevents);
+
+
+    static UnaryOperator<ByteBuffer> term() {
+
+        return anyOf(word,
+                variable,
+                compoundTerm, statement);
 
     }
 
-    nars.javIdent JavIdent = new nars.javIdent();
 
-    @Infix
-    @Backtracking
-    class javIdent implements UnaryOperator<ByteBuffer> {
+    UnaryOperator<ByteBuffer> JavIdent = new UnaryOperator<ByteBuffer>() {
+        @Override
+        public String toString() {
+            return "identifier";
+        }
+
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
             return (ByteBuffer) repeat(buffer1 -> buffer1.hasRemaining() && Character.isJavaIdentifierPart(buffer1.get()) ? buffer1 : null);
         }
-    }
+    };
 
-    static UnaryOperator<ByteBuffer> term() {
-        return null;
-    }
-
-    UnaryOperator<ByteBuffer> negation = confix(strlit("(--"), chlit(')'), nars.term());
-    UnaryOperator<ByteBuffer> extensionaldifference = confix(strlit("(-"), chlit(')'), confix(term(), term(), chlit(',')));
-    UnaryOperator<ByteBuffer> intensionaldifference = confix(strlit("(~"), chlit(')'), confix(term(), term(), chlit(',')));
-    UnaryOperator<ByteBuffer> intensionalset = confix("[]", allOf(term(), opt(termListTail()) ));
-
-    @NotNull
-    static UnaryOperator<ByteBuffer> termListTail() {
-        return BYTE_BUFFER_UNARY_OPERATOR;
-    }
-
-    UnaryOperator<ByteBuffer> extensionalset = confix("{}", termListTail());
-    UnaryOperator<ByteBuffer> intensionalintersection = confix(strlit("(|"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> extensionalintersection = confix(strlit("(&"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> product = confix(strlit("(*"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> extensionalimage = confix(strlit("(/"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> intensionalimage = confix(strlit("()\\"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> disjunction = confix(strlit("(||"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> conjunction = confix(strlit("(&&"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> sequentialevents = confix(strlit("(&/"), chlit(")"), termListTail());
-    UnaryOperator<ByteBuffer> parallelevents = confix(strlit("(&|"), chlit(")"), termListTail());
 }

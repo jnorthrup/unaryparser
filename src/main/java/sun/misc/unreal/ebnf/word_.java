@@ -1,8 +1,5 @@
 package sun.misc.unreal.ebnf;
 
-import bbcursive.ann.Backtracking;
-import bbcursive.ann.Infix;
-
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
@@ -13,10 +10,12 @@ import static java.lang.Character.isAlphabetic;
  */
 public enum word_ {
     ;
-    public static final UnaryOperator<ByteBuffer> word = new ByteBufferUnaryOperator();
+    public static final UnaryOperator<ByteBuffer> word = new UnaryOperator<ByteBuffer>() {
+        @Override
+        public String toString() {
+            return "word";
+        }
 
-    @Infix@Backtracking
-     static class ByteBufferUnaryOperator implements UnaryOperator<ByteBuffer> {
         @Override
         public ByteBuffer apply(ByteBuffer b) {
             if (null != b) {
@@ -29,5 +28,6 @@ public enum word_ {
             }
             return null;
         }
-    }
+    };
+
 }
