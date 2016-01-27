@@ -12,6 +12,7 @@ import static bbcursive.lib.opt_.opt;
 import static bbcursive.lib.repeat_.repeat;
 import static bbcursive.lib.skipper_.skipper;
 import static bbcursive.lib.strlit.strlit;
+import static bbcursive.std.bb;
 import static sun.misc.unreal.ebnf.word_.word;
 
 /**
@@ -31,19 +32,19 @@ public interface nars {
     UnaryOperator<ByteBuffer> VAR_QUERY = chlit('?');
 
     /* numerical chlit(value delimitors, must be different from the Term delimitors *)/
-   UnaryOperator<ByteBuffer> BUDGET_VALUE_MARK = chlit('$');
-   UnaryOperator<ByteBuffer> TRUTH_VALUE_MARK = chlit('%');
-   UnaryOperator<ByteBuffer> VALUE_SEPARATOR = chlit(';');
+   UnaryOperator<ByteBuffer> BUDGET_VALUE_MARK         = chlit('$');
+   UnaryOperator<ByteBuffer> TRUTH_VALUE_MARK          = chlit('%');
+   UnaryOperator<ByteBuffer> VALUE_SEPARATOR           = chlit(';');
 
    /* CompountTerm chlit(delimitors, must use 4 different pairs *)/
-   UnaryOperator<ByteBuffer> COMPOUND_TERM_OPENER = chlit('(');
-   UnaryOperator<ByteBuffer> COMPOUND_TERM_CLOSER = chlit(')');
-   UnaryOperator<ByteBuffer> STATEMENT_OPENER = chlit('<');
-   UnaryOperator<ByteBuffer> STATEMENT_CLOSER = chlit('>');
-   UnaryOperator<ByteBuffer> SET_EXT_OPENER = chlit('{');
-   UnaryOperator<ByteBuffer> SET_EXT_CLOSER = chlit('}');
-   UnaryOperator<ByteBuffer> SET_INT_OPENER = chlit('[');
-   UnaryOperator<ByteBuffer> SET_INT_CLOSER = chlit(']');
+   UnaryOperator<ByteBuffer> COMPOUND_TERM_OPENER      = chlit('(');
+   UnaryOperator<ByteBuffer> COMPOUND_TERM_CLOSER      = chlit(')');
+   UnaryOperator<ByteBuffer> STATEMENT_OPENER          = chlit('<');
+   UnaryOperator<ByteBuffer> STATEMENT_CLOSER          = chlit('>');
+   UnaryOperator<ByteBuffer> SET_EXT_OPENER            = chlit('{');
+   UnaryOperator<ByteBuffer> SET_EXT_CLOSER            = chlit('}');
+   UnaryOperator<ByteBuffer> SET_INT_OPENER            = chlit('[');
+   UnaryOperator<ByteBuffer> SET_INT_CLOSER            = chlit(']');
 
                                                    /* special chlit(characors in argument list *)/
    UnaryOperator<ByteBuffer> ARGUMENT_SEPARATOR = chlit(',');
@@ -58,7 +59,7 @@ public interface nars {
 
 
     enum Operator implements UnaryOperator<ByteBuffer> {
-        /* CompountTerm operators, length = 1 */
+        /* CompoundTerm operators, length = 1 */
         INTERSECTION_EXT {
             @Override
             public String toString() {
@@ -101,7 +102,6 @@ public interface nars {
                 return "\\";
             }
         },
-
         /* CompoundStatement operators, length = 2 */
         NEGATION {
             @Override
@@ -135,8 +135,9 @@ public interface nars {
         };
 
 
+        @Override
         public ByteBuffer apply(ByteBuffer o) {
-            return strlit(toString()).apply(o);
+            return strlit(this.toString()).apply(o);
         }
     }
 
@@ -239,59 +240,23 @@ public interface nars {
 
         @Override
         public ByteBuffer apply(Object o) {
-            return strlit(this.toString()).apply((ByteBuffer) o);
+            return strlit(toString()).apply((ByteBuffer) o);
         }
     }
 
-    static UnaryOperator<ByteBuffer> copula() {
-        return anyOf(Relation.values());
-    }
-
-    UnaryOperator<ByteBuffer> negation = confix(strlit("(--"), chlit(')'), term());
-    UnaryOperator<ByteBuffer> extensionaldifference = confix(strlit("(-"), chlit(')'), confix(term(), term(), chlit(',')));
-    UnaryOperator<ByteBuffer> intensionaldifference = confix(strlit("(~"), chlit(')'), confix(term(), term(), chlit(',')));
-    UnaryOperator<ByteBuffer> intensionalset = confix("[]", allOf(term(), opt(TERMLISTTAIL)));
-    UnaryOperator<ByteBuffer> extensionalset = confix("{}", TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> intensionalintersection = confix(strlit("(|"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> extensionalintersection = confix(strlit("(&"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> product = confix(strlit("(*"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> extensionalimage = confix(strlit("(/"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> intensionalimage = confix(strlit("(\\"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> disjunction = confix(strlit("(||"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> conjunction = confix(strlit("(&&"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> sequentialevents = confix(strlit("(&/"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> parallelevents = confix(strlit("(&|"), chlit(")"), TERMLISTTAIL);
-    UnaryOperator<ByteBuffer> statement = anyOf(confix("<>", skipper(term(), copula(), term())), allOf(strlit("@$|!LexMe!|$@"), term()), confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL))),
-            variable = infix(anyOf("#?$"), word),
-            tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT),
-            val = infix(allOf(opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456")))),
-            frequency = val,
-            confidence = val, priority = val, durability = val,
-
-    truth = confix("%", skipper(frequency, opt(chlit(';'),confidence))),
-    budget = confix("$", skipper(priority, opt(chlit(';'),durability))),
-    compoundTerm=anyOf(
-            negation,
-            extensionaldifference,
-            intensionaldifference,
-            intensionalset,
-            extensionalset,
-            intensionalintersection,
-            extensionalintersection,
-            product,
-            extensionalimage,
-            intensionalimage,
-            disjunction,
-            conjunction,
-            sequentialevents,
-            parallelevents);
-
-
     static UnaryOperator<ByteBuffer> term() {
 
-        return anyOf(word,
-                variable,
-                compoundTerm, statement);
+        return new UnaryOperator<ByteBuffer>() {
+            @Override
+            public String toString() {
+                return "term";
+            }
+
+            @Override
+            public ByteBuffer apply(ByteBuffer buffer) {
+                return bb(buffer, anyOf(word, variable(), compoundTerm(), statement()));
+            }
+        };
 
     }
 
@@ -308,4 +273,98 @@ public interface nars {
         }
     };
 
+    static UnaryOperator<ByteBuffer> copula() {
+        return anyOf(nars.Relation.values());
+    }
+
+    enum compoundOp implements UnaryOperator<ByteBuffer> {
+        negation(confix(strlit("(--"), chlit(')'), term())),
+        extensionaldifference(confix(strlit("(-"), chlit(')'), confix(term(), term(), chlit(',')))),
+        intensionaldifference(confix(strlit("(~"), chlit(')'), confix(term(), term(), chlit(',')))),
+        intensionalset(confix("[]", allOf(term(), opt(TERMLISTTAIL)))),
+        extensionalset(confix("{}", TERMLISTTAIL)),
+        intensionalintersection(confix(strlit("(|"), chlit(")"), TERMLISTTAIL)),
+        extensionalintersection(confix(strlit("(&"), chlit(")"), TERMLISTTAIL)),
+        product(confix(strlit("(*"), chlit(")"), TERMLISTTAIL)),
+        extensionalimage(confix(strlit("(/"), chlit(")"), TERMLISTTAIL)),
+        intensionalimage(confix(strlit("(\\"), chlit(")"), TERMLISTTAIL)),
+        disjunction(confix(strlit("(||"), chlit(")"), TERMLISTTAIL)),
+        conjunction(confix(strlit("(&&"), chlit(")"), TERMLISTTAIL)),
+        sequentialevents(confix(strlit("(&/"), chlit(")"), TERMLISTTAIL)),
+        parallelevents(confix(strlit("(&|"), chlit(")"), TERMLISTTAIL));
+
+        private final UnaryOperator<ByteBuffer> unaryOperator;
+
+        compoundOp(UnaryOperator<ByteBuffer> unaryOperator) {
+
+            this.unaryOperator = unaryOperator;
+        }
+
+        @Override
+        public ByteBuffer apply(ByteBuffer buffer) {
+            return bb(buffer, unaryOperator);
+        }
+    }
+
+
+    static UnaryOperator<ByteBuffer> variable() {
+        return infix(anyOf("#?$"), word);
+    }
+
+    static UnaryOperator<ByteBuffer> statement() {
+        return new UnaryOperator<ByteBuffer>() {
+            @Override
+            public String toString() {
+                return "statement";
+            }
+
+            @Override
+            public ByteBuffer apply(ByteBuffer buffer) {
+                return bb(buffer, anyOf(confix("<>", skipper(term(), copula(), term())), allOf(strlit("@$|!LexMe!|$@"), term()), confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL))));
+            }
+        };
+    }
+
+
+    UnaryOperator<ByteBuffer> tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
+    UnaryOperator<ByteBuffer> val = infix(allOf(opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456"))));
+    UnaryOperator<ByteBuffer> frequency = val;
+    UnaryOperator<ByteBuffer> confidence = val;
+    UnaryOperator<ByteBuffer> priority = val;
+    UnaryOperator<ByteBuffer> durability = val;
+
+    UnaryOperator<ByteBuffer> truth = confix("%", skipper(frequency, opt(chlit(';'), confidence)));
+    UnaryOperator<ByteBuffer> budget = confix("$", skipper(priority, opt(chlit(';'), durability)));
+
+    static UnaryOperator<ByteBuffer> compoundTerm(){
+
+
+
+        return new UnaryOperator<ByteBuffer>() {
+            @Override
+            public String toString() {
+                return "compoundTerm";
+            }
+
+            @Override
+            public ByteBuffer apply(ByteBuffer buffer) {
+                return bb(buffer,
+                        anyOf(
+                                compoundOp.negation,
+                                compoundOp.extensionaldifference,
+                                compoundOp.intensionaldifference,
+                                compoundOp.intensionalset,
+                                compoundOp.extensionalset,
+                                compoundOp.intensionalintersection,
+                                compoundOp.extensionalintersection,
+                                compoundOp.product,
+                                compoundOp.extensionalimage,
+                                compoundOp.intensionalimage,
+                                compoundOp.disjunction,
+                                compoundOp.conjunction,
+                                compoundOp.sequentialevents,
+                                compoundOp.parallelevents));
+            }
+        };
+    }
 }
