@@ -14,6 +14,7 @@ import static bbcursive.lib.skipper_.skipper;
 import static bbcursive.lib.strlit.strlit;
 import static bbcursive.std.bb;
 import static sun.misc.unreal.ebnf.word_.word;
+import static sun.misc.unreal.nars.nars.compoundOp.*;
 
 /**
  * Created by jim on 1/20/16.
@@ -56,6 +57,11 @@ public interface nars {
     UnaryOperator<ByteBuffer> TENSE_PRESENT = strlit(":|:");
     UnaryOperator<ByteBuffer> TENSE_FUTURE = strlit(":/:");
     UnaryOperator<ByteBuffer> TERMLISTTAIL = skipper(repeat(chlit(','), term()));
+    String PAROP = "&|";
+    String SEQ_OP = "&/";
+    String DISJ_OP = "||";
+    String NEG_OP = "--";
+    UnaryOperator<ByteBuffer> ARTIFACT = strlit("@$|!LexMe!|$@");
 
 
     enum Operator implements UnaryOperator<ByteBuffer> {
@@ -99,47 +105,47 @@ public interface nars {
         IMAGE_INT {
             @Override
             public String toString() {
-                return "\\";
+                return IMG_OP;
             }
         },
         /* CompoundStatement operators, length = 2 */
         NEGATION {
             @Override
             public String toString() {
-                return "--";
+                return NEG_OP;
             }
         },
         DISJUNCTION {
             @Override
             public String toString() {
-                return "||";
+                return DISJ_OP;
             }
         },
         CONJUNCTION {
             @Override
             public String toString() {
-                return "&&";
+                return CONJ_OP;
             }
         },
         SEQUENCE {
             @Override
             public String toString() {
-                return "&/";
+                return SEQ_OP;
             }
         },
         PARALLEL {
             @Override
             public String toString() {
-                return "&|";
+                return PAROP;
             }
         };
-
-
         @Override
         public ByteBuffer apply(ByteBuffer o) {
             return strlit(this.toString()).apply(o);
         }
-    }
+     }
+    String IMG_OP = "\\";
+    String CONJ_OP = "&&";
 
     UnaryOperator<ByteBuffer> INTERSECTION_EXT_OPERATORc = chlit('&');
     UnaryOperator<ByteBuffer> DIFFERENCE_EXT_OPERATORc = chlit('-');
@@ -162,7 +168,7 @@ public interface nars {
     UnaryOperator<ByteBuffer> DISJUNCTION_OPERATOR = strlit("||");
     UnaryOperator<ByteBuffer> CONJUNCTION_OPERATOR = strlit("&&");
     UnaryOperator<ByteBuffer> SEQUENCE_OPERATOR = strlit("&/");
-    UnaryOperator<ByteBuffer> PARALLEL_OPERATOR = strlit("&|");
+    UnaryOperator<ByteBuffer> PARALLEL_OPERATOR = strlit(PAROP);
 
     enum Relation implements UnaryOperator {
         INHERITANCE {
@@ -274,7 +280,7 @@ public interface nars {
     };
 
     static UnaryOperator<ByteBuffer> copula() {
-        return anyOf(nars.Relation.values());
+        return anyOf(Relation.values());
     }
 
     enum compoundOp implements UnaryOperator<ByteBuffer> {
@@ -320,14 +326,16 @@ public interface nars {
 
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, anyOf(confix("<>", skipper(term(), copula(), term())), allOf(strlit("@$|!LexMe!|$@"), term()), confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL))));
+                return bb(buffer, anyOf(
+                        confix("<>", skipper(term(), copula(), term())), confix(strlit("(^"), chlit(")"),allOf(word, TERMLISTTAIL)), infix(ARTIFACT, term())
+                        ));
             }
         };
     }
 
 
     UnaryOperator<ByteBuffer> tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
-    UnaryOperator<ByteBuffer> val = infix(allOf(opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456"))));
+    UnaryOperator<ByteBuffer> val = infix( opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456")));
     UnaryOperator<ByteBuffer> frequency = val;
     UnaryOperator<ByteBuffer> confidence = val;
     UnaryOperator<ByteBuffer> priority = val;
@@ -337,9 +345,6 @@ public interface nars {
     UnaryOperator<ByteBuffer> budget = confix("$", skipper(priority, opt(chlit(';'), durability)));
 
     static UnaryOperator<ByteBuffer> compoundTerm(){
-
-
-
         return new UnaryOperator<ByteBuffer>() {
             @Override
             public String toString() {
@@ -350,20 +355,20 @@ public interface nars {
             public ByteBuffer apply(ByteBuffer buffer) {
                 return bb(buffer,
                         anyOf(
-                                compoundOp.negation,
-                                compoundOp.extensionaldifference,
-                                compoundOp.intensionaldifference,
-                                compoundOp.intensionalset,
-                                compoundOp.extensionalset,
-                                compoundOp.intensionalintersection,
-                                compoundOp.extensionalintersection,
-                                compoundOp.product,
-                                compoundOp.extensionalimage,
-                                compoundOp.intensionalimage,
-                                compoundOp.disjunction,
-                                compoundOp.conjunction,
-                                compoundOp.sequentialevents,
-                                compoundOp.parallelevents));
+                                negation,
+                                extensionaldifference,
+                                intensionaldifference,
+                                intensionalset,
+                                extensionalset,
+                                intensionalintersection,
+                                extensionalintersection,
+                                product,
+                                extensionalimage,
+                                intensionalimage,
+                                disjunction,
+                                conjunction,
+                                sequentialevents,
+                                parallelevents));
             }
         };
     }

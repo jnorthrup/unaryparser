@@ -13,7 +13,7 @@ public class narsTest {
     @Test
     public void testsmt() throws Exception {
         std.flags.get().add(std.traits.backtrackOnNull);
-        assertNotNull(std.bb("<(somethign, ?possibleFunction) --> allows>", nars.statement()));
+        assertNotNull(std.bb("<chess --> competition>", nars.statement()));
     }
 
     @Test
