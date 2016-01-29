@@ -139,11 +139,13 @@ public interface nars {
                 return PAROP;
             }
         };
+
         @Override
         public ByteBuffer apply(ByteBuffer o) {
             return strlit(this.toString()).apply(o);
         }
-     }
+    }
+
     String IMG_OP = "\\";
     String CONJ_OP = "&&";
 
@@ -170,7 +172,7 @@ public interface nars {
     UnaryOperator<ByteBuffer> SEQUENCE_OPERATOR = strlit("&/");
     UnaryOperator<ByteBuffer> PARALLEL_OPERATOR = strlit(PAROP);
 
-    enum Relation implements UnaryOperator {
+    enum Relation implements UnaryOperator<ByteBuffer> {
         INHERITANCE {
             @Override
             public String toString() {
@@ -245,8 +247,8 @@ public interface nars {
         };
 
         @Override
-        public ByteBuffer apply(Object o) {
-            return strlit(toString()).apply((ByteBuffer) o);
+        public ByteBuffer apply(ByteBuffer o) {
+            return strlit(toString()).apply(o);
         }
     }
 
@@ -327,15 +329,18 @@ public interface nars {
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
                 return bb(buffer, anyOf(
-                        confix("<>", skipper(term(), copula(), term())), confix(strlit("(^"), chlit(")"),allOf(word, TERMLISTTAIL)), infix(ARTIFACT, term())
-                        ));
+                        confix("<>", skipper(term(), copula(), term())),
+                        confix(strlit("(^"), chlit(")"),
+                                allOf(word, TERMLISTTAIL)),
+                        infix(ARTIFACT, term())
+                ));
             }
         };
     }
 
 
     UnaryOperator<ByteBuffer> tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
-    UnaryOperator<ByteBuffer> val = infix( opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456")));
+    UnaryOperator<ByteBuffer> val = infix(opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456")));
     UnaryOperator<ByteBuffer> frequency = val;
     UnaryOperator<ByteBuffer> confidence = val;
     UnaryOperator<ByteBuffer> priority = val;
@@ -344,7 +349,7 @@ public interface nars {
     UnaryOperator<ByteBuffer> truth = confix("%", skipper(frequency, opt(chlit(';'), confidence)));
     UnaryOperator<ByteBuffer> budget = confix("$", skipper(priority, opt(chlit(';'), durability)));
 
-    static UnaryOperator<ByteBuffer> compoundTerm(){
+    static UnaryOperator<ByteBuffer> compoundTerm() {
         return new UnaryOperator<ByteBuffer>() {
             @Override
             public String toString() {

@@ -3,7 +3,6 @@ package sun.misc.unreal;
 import bbcursive.std;
 import junit.framework.TestCase;
 import org.junit.Test;
-import sun.misc.unreal.nars.nars;
 
 import java.nio.ByteBuffer;
 
@@ -16,6 +15,7 @@ import static bbcursive.std.bb;
 import static bbcursive.std.flags;
 import static sun.misc.unreal.ebnf.letter_.letter;
 import static sun.misc.unreal.ebnf.word_.word;
+import static sun.misc.unreal.nars.nars.Relation.values;
 
 /**
  * Created by jim on 1/16/16.
@@ -27,7 +27,7 @@ public class BbTest extends TestCase {
        assertNotNull(bb("abcde", repeat(anyOf("abcde"))));
 
 //       flags.get().add(std.traits.backtrackOnNull);
-       assertNotNull(bb(" <=> ",skipper( (anyOf(nars.Relation.values())))));
+       assertNotNull(bb("<=>  ",skipper(anyOf(values()))));
 
 
   }
