@@ -328,12 +328,11 @@ public interface nars {
 
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, anyOf(
-                        confix("<>", skipper(term(), copula(), term())),
-                        confix(strlit("(^"), chlit(")"),
-                                allOf(word, TERMLISTTAIL)),
-                        infix(ARTIFACT, term())
-                ));
+                return bb(buffer, skipper(anyOf(
+                        infix(ARTIFACT, term()),
+                        confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL)),
+                        confix("<>", allOf(term(), copula(), term()))
+                        )));
             }
         };
     }

@@ -27,10 +27,10 @@ public class BbTest extends TestCase {
        assertNotNull(bb("abcde", repeat(anyOf("abcde"))));
 
 //       flags.get().add(std.traits.backtrackOnNull);
-       assertNotNull(bb("<=>  ",skipper(anyOf(values()))));
-
-
+      ByteBuffer bb = bb("<=>  ", skipper(anyOf(values())));
+      TestCase.assertNotNull(bb);
   }
+
     @Test
     public void testConfix() {
         ByteBuffer wrap;

@@ -14,11 +14,16 @@ import static sun.misc.unreal.nars.nars.statement;
 public class narsTest {
 
     @Test
-    public void testsmt() throws Exception {
+    public void testsmts() throws Exception {
+        std.flags.get().add(backtrackOnNull);
+         assertNotNull(bb("< chess --> competition >", statement()));
+    }
+
+    @Test
+    public void testsmta() throws Exception {
         std.flags.get().add(backtrackOnNull);
         assertNotNull(bb("<chess-->competition>", statement()));
-        assertNotNull(bb("< chess --> competition >", statement()));
-    }
+     }
 
     @Test
     public void testTerm() throws Exception {
