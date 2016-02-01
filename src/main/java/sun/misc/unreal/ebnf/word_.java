@@ -19,12 +19,12 @@ public enum word_ {
         @Override
         public ByteBuffer apply(ByteBuffer b) {
             if (null != b) {
-                boolean rem;
-                while ((rem = b.hasRemaining()) && isAlphabetic(((ByteBuffer) b.mark()).get() & 0xff)) ;
+                boolean rem=false,cap = false;
+                while ((rem = b.hasRemaining()) && (cap|=isAlphabetic(((ByteBuffer) b.mark()).get() & 0xff))) ;
                 if (rem) {
                     b.reset();
                 }
-                return b;
+                return cap?b:null;
             }
             return null;
         }

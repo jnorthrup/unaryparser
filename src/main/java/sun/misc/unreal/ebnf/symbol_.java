@@ -10,5 +10,5 @@ import java.util.function.UnaryOperator;
  */
 public enum symbol_ {
     ;
-    public static final UnaryOperator<ByteBuffer> symbol = anyOf_.anyOf("[]{}()<>'\"=|.,;");
+    public static final UnaryOperator<ByteBuffer> symbol = anyOf_.anyIn("[]{}()<>'\"=|.,;");
 }

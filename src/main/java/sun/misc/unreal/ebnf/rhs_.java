@@ -3,7 +3,7 @@ package sun.misc.unreal.ebnf;
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
-import static bbcursive.lib.anyOf_.anyOf;
+import static bbcursive.lib.anyOf_.*;
 import static bbcursive.std.bb;
 import static sun.misc.unreal.ebnf.firstOf_.firstOf;
 import static sun.misc.unreal.ebnf.grouping_.grouping;
@@ -28,7 +28,7 @@ public enum rhs_ {
 
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, anyOf(identifier(), terminal(), optional, repeating(), grouping, firstOf, listOf));
+                return bb(buffer, anyIn(identifier(), terminal(), optional, repeating(), grouping, firstOf, listOf));
             }
         };
     }

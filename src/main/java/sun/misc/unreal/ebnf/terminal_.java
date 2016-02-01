@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
 import static bbcursive.lib.allOf_.allOf;
-import static bbcursive.lib.anyOf_.anyOf;
+import static bbcursive.lib.anyOf_.*;
 import static bbcursive.lib.confix_.confix;
 import static bbcursive.lib.infix_.infix;
 import static bbcursive.lib.repeat_.repeat;
@@ -33,7 +33,7 @@ public enum terminal_ {
 
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
-            return bb(buffer, anyOf(
+            return bb(buffer, anyIn(
                     confix("''", infix(allOf(character, repeat(character)))),
                     confix("\"\"", infix(allOf(character, repeat(character))))));
 

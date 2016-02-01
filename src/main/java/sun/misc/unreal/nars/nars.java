@@ -1,10 +1,12 @@
 package sun.misc.unreal.nars;
 
+import bbcursive.lib.anyOf_;
+
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
 import static bbcursive.lib.allOf_.allOf;
-import static bbcursive.lib.anyOf_.anyOf;
+import static bbcursive.lib.anyOf_.*;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.confix_.confix;
 import static bbcursive.lib.infix_.infix;
@@ -262,7 +264,7 @@ public interface nars {
 
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, anyOf(word, variable(), compoundTerm(), statement()));
+                return bb(buffer, anyIn(word, variable(), compoundTerm(), statement()));
             }
         };
 
@@ -282,13 +284,13 @@ public interface nars {
     };
 
     static UnaryOperator<ByteBuffer> copula() {
-        return anyOf(Relation.values());
+        return anyIn(Relation.values());
     }
 
     enum compoundOp implements UnaryOperator<ByteBuffer> {
         negation(confix(strlit("(--"), chlit(')'), term())),
-        extensionaldifference(confix(strlit("(-"), chlit(')'), confix(term(), term(), chlit(',')))),
-        intensionaldifference(confix(strlit("(~"), chlit(')'), confix(term(), term(), chlit(',')))),
+        extensionaldifference(confix(strlit("(-"), chlit(')'), skipper(term(), chlit(','), term()))),
+        intensionaldifference(confix(strlit("(~"), chlit(')'), skipper(term(), chlit(','),term()))),
         intensionalset(confix("[]", allOf(term(), opt(TERMLISTTAIL)))),
         extensionalset(confix("{}", TERMLISTTAIL)),
         intensionalintersection(confix(strlit("(|"), chlit(")"), TERMLISTTAIL)),
@@ -316,30 +318,17 @@ public interface nars {
 
 
     static UnaryOperator<ByteBuffer> variable() {
-        return infix(anyOf("#?$"), word);
+        return infix(anyOf_.anyIn("#?$"), word);
     }
 
     static UnaryOperator<ByteBuffer> statement() {
-        return new UnaryOperator<ByteBuffer>() {
-            @Override
-            public String toString() {
-                return "statement";
-            }
-
-            @Override
-            public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, skipper(anyOf(
-                        infix(ARTIFACT, term()),
-                        confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL)),
-                        confix("<>", allOf(term(), copula(), term()))
-                        )));
-            }
-        };
+        UnaryOperator<ByteBuffer> unaryOperator = new stmtOper();
+        return unaryOperator;
     }
 
 
-    UnaryOperator<ByteBuffer> tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
-    UnaryOperator<ByteBuffer> val = infix(opt(anyOf("10")), anyOf(".10"), repeat(anyOf("1092387456")));
+    UnaryOperator<ByteBuffer> tense = anyIn(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
+    UnaryOperator<ByteBuffer> val = infix(opt(anyOf_.anyIn("10")), anyOf_.anyIn(".10"), repeat(anyOf_.anyIn("1092387456")));
     UnaryOperator<ByteBuffer> frequency = val;
     UnaryOperator<ByteBuffer> confidence = val;
     UnaryOperator<ByteBuffer> priority = val;
@@ -358,7 +347,7 @@ public interface nars {
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
                 return bb(buffer,
-                        anyOf(
+                        anyIn(
                                 negation,
                                 extensionaldifference,
                                 intensionaldifference,
@@ -375,5 +364,23 @@ public interface nars {
                                 parallelevents));
             }
         };
+    }
+
+
+    class stmtOper implements UnaryOperator<ByteBuffer> {
+        @Override
+        public String toString() {
+            return "statement";
+        }
+
+        @Override
+        public ByteBuffer apply(ByteBuffer buffer) {
+            return bb(buffer, skipper(
+                    anyIn(
+                            confix("<>", allOf(term(), copula(), term())),
+                            confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL)),
+                            infix(ARTIFACT, term())
+                            )));
+        }
     }
 }

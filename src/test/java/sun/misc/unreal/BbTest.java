@@ -1,12 +1,13 @@
 package sun.misc.unreal;
 
+import bbcursive.lib.anyOf_;
 import bbcursive.std;
 import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static bbcursive.lib.anyOf_.anyOf;
+import static bbcursive.lib.anyOf_.*;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.confix_.confix;
 import static bbcursive.lib.repeat_.repeat;
@@ -24,10 +25,10 @@ public class BbTest extends TestCase {
 
   @Test
     public void testAny() {
-       assertNotNull(bb("abcde", repeat(anyOf("abcde"))));
+       assertNotNull(bb("abcde", repeat(anyOf_.anyIn("abcde"))));
 
-//       flags.get().add(std.traits.backtrackOnNull);
-      ByteBuffer bb = bb("<=>  ", skipper(anyOf(values())));
+//       flags.get().add(std.traits.backtracking);
+      ByteBuffer bb = bb("<=>  ", skipper(anyIn(values())));
       TestCase.assertNotNull(bb);
   }
 
@@ -37,8 +38,8 @@ public class BbTest extends TestCase {
         flags.get().clear();
         TestCase.assertNotNull(bb( "a=b;", letter, confix("=;", letter)));
         System.err.println("-----");
-        flags.get().add(std.traits.skipWs);
-        flags.get().add(std.traits.backtrackOnNull);
+        flags.get().add(std.traits.skipper);
+        flags.get().add(std.traits.backtracking);
         TestCase.assertNotNull(bb( "a=b;", letter, confix("=;", letter)));
         System.err.println("-----");
         flags.get().clear();
