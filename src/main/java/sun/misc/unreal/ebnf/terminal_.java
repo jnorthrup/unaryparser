@@ -33,7 +33,7 @@ public enum terminal_ {
 
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
-            return bb(buffer, anyIn(
+            return bb(buffer, anyOf(
                     confix("''", infix(allOf(character, repeat(character)))),
                     confix("\"\"", infix(allOf(character, repeat(character))))));
 

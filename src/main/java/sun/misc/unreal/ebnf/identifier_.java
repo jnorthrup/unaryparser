@@ -1,10 +1,11 @@
 package sun.misc.unreal.ebnf;
 
+import bbcursive.lib.anyOf_;
+
 import java.nio.ByteBuffer;
 import java.util.function.UnaryOperator;
 
 import static bbcursive.lib.allOf_.allOf;
-import static bbcursive.lib.anyOf_.anyIn;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.repeat_.repeat;
 import static bbcursive.std.bb;
@@ -26,7 +27,7 @@ public enum identifier_ {
 
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
-            return bb(buffer,allOf(letter, repeat(anyIn(letter, digit, chlit('_')))));
+            return bb(buffer,allOf(letter, repeat(anyOf_.anyOf(letter, digit, chlit('_')))));
         }
     };}
 

@@ -1,5 +1,6 @@
 package sun.misc.unreal.nars;
 
+import bbcursive.ann.Skipper;
 import bbcursive.lib.anyOf_;
 
 import java.nio.ByteBuffer;
@@ -264,7 +265,7 @@ public interface nars {
 
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, anyIn(word, variable(), compoundTerm(), statement()));
+                return bb(buffer, anyOf(word, variable(), compoundTerm(), statement()));
             }
         };
 
@@ -284,7 +285,7 @@ public interface nars {
     };
 
     static UnaryOperator<ByteBuffer> copula() {
-        return anyIn(Relation.values());
+        return anyOf(Relation.values());
     }
 
     enum compoundOp implements UnaryOperator<ByteBuffer> {
@@ -327,7 +328,7 @@ public interface nars {
     }
 
 
-    UnaryOperator<ByteBuffer> tense = anyIn(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
+    UnaryOperator<ByteBuffer> tense = anyOf(TENSE_FUTURE, TENSE_PAST, TENSE_PRESENT);
     UnaryOperator<ByteBuffer> val = infix(opt(anyOf_.anyIn("10")), anyOf_.anyIn(".10"), repeat(anyOf_.anyIn("1092387456")));
     UnaryOperator<ByteBuffer> frequency = val;
     UnaryOperator<ByteBuffer> confidence = val;
@@ -338,32 +339,7 @@ public interface nars {
     UnaryOperator<ByteBuffer> budget = confix("$", skipper(priority, opt(chlit(';'), durability)));
 
     static UnaryOperator<ByteBuffer> compoundTerm() {
-        return new UnaryOperator<ByteBuffer>() {
-            @Override
-            public String toString() {
-                return "compoundTerm";
-            }
-
-            @Override
-            public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer,
-                        anyIn(
-                                negation,
-                                extensionaldifference,
-                                intensionaldifference,
-                                intensionalset,
-                                extensionalset,
-                                intensionalintersection,
-                                extensionalintersection,
-                                product,
-                                extensionalimage,
-                                intensionalimage,
-                                disjunction,
-                                conjunction,
-                                sequentialevents,
-                                parallelevents));
-            }
-        };
+        return new compound();
     }
 
 
@@ -376,11 +352,40 @@ public interface nars {
         @Override
         public ByteBuffer apply(ByteBuffer buffer) {
             return bb(buffer, skipper(
-                    anyIn(
+                    anyOf(
                             confix("<>", allOf(term(), copula(), term())),
                             confix(strlit("(^"), chlit(")"), allOf(word, TERMLISTTAIL)),
                             infix(ARTIFACT, term())
                             )));
+        }
+    }
+
+
+    @Skipper
+    class compound implements UnaryOperator<ByteBuffer> {
+        @Override
+        public String toString() {
+            return "compoundTerm";
+        }
+
+        @Override
+        public ByteBuffer apply(ByteBuffer buffer) {
+            return bb(buffer,
+                    anyOf(
+                            negation,
+                            extensionaldifference,
+                            intensionaldifference,
+                            intensionalset,
+                            extensionalset,
+                            intensionalintersection,
+                            extensionalintersection,
+                            product,
+                            extensionalimage,
+                            intensionalimage,
+                            disjunction,
+                            conjunction,
+                            sequentialevents,
+                            parallelevents));
         }
     }
 }

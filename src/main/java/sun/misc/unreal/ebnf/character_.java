@@ -11,5 +11,5 @@ import java.util.function.UnaryOperator;
  */
 public enum character_ {
     ;
-    public static final UnaryOperator<ByteBuffer> character = anyOf_.anyIn(letter_.letter, digit_.digit, symbol_.symbol, chlit_.chlit('_'));
+    public static final UnaryOperator<ByteBuffer> character = anyOf_.anyOf(letter_.letter, digit_.digit, symbol_.symbol, chlit_.chlit('_'));
 }

@@ -28,7 +28,7 @@ public enum rhs_ {
 
             @Override
             public ByteBuffer apply(ByteBuffer buffer) {
-                return bb(buffer, anyIn(identifier(), terminal(), optional, repeating(), grouping, firstOf, listOf));
+                return bb(buffer, anyOf(identifier(), terminal(), optional, repeating(), grouping, firstOf, listOf));
             }
         };
     }
