@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
+import static bbcursive.lib.allOf_.allOf;
 import static bbcursive.lib.anyOf_.*;
 import static bbcursive.lib.chlit_.chlit;
 import static bbcursive.lib.confix_.confix;
@@ -51,6 +52,24 @@ public class BbTest extends TestCase {
         wrap = ByteBuffer.wrap("aa".getBytes());
         ByteBuffer bb = bb(wrap, word);
         TestCase.assertNotNull(bb);
+    }
+
+    @Test
+    public void testAll() {
+
+        TestCase.assertNotNull(bb("a", allOf(chlit("a"))));
+    }
+
+    @Test
+    public void testAll2() {
+
+        TestCase.assertNull(bb("", allOf(chlit("a"))));
+    }
+
+    @Test
+    public void testAll3() {
+        ByteBuffer wrap = ByteBuffer.wrap("a".getBytes());
+        TestCase.assertNotNull(bb(wrap, chlit("a")));
     }
 
     @Test
